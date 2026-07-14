@@ -1,0 +1,151 @@
+.pmp-filter-dropdown-wrapper {
+  position: relative;
+  width: 100%;
+  z-index: 100;
+}
+
+.pmp-filter-select-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.pmp-filter-select-input {
+  width: 100%;
+  min-height: 32px;
+  height: 32px;
+  border: 1px solid #d7dde5;
+  border-radius: 6px;
+  background-color: #fff;
+  font-size: 12px;
+  color: #495057;
+  padding: 0 34px 0 10px;
+  cursor: pointer;
+}
+
+.pmp-filter-select-input:focus {
+  outline: none;
+  border-color: #E53E3E;
+  box-shadow: 0 0 0 1px rgba(98, 144, 62, 0.15);
+}
+
+.pmp-filter-select-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  pointer-events: none;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.pmp-filter-select-icon.open {
+  transform: translateY(-50%) rotate(180deg);
+  color: #495057;
+}
+
+.pmp-dropdown-portal {
+  position: fixed;
+  z-index: 9999;
+  min-width: 230px;
+  border: 1px solid #e6ebf2;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.pmp-dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #303030;
+  cursor: pointer;
+}
+
+.pmp-dropdown-option:hover {
+  background-color: #E53E3E;
+  color: #FFFFFF;
+}
+
+.pmp-dropdown-option.selected {
+  background-color: #E53E3E;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.pmp-dropdown-tick {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+.pmp-checkbox-box {
+  width: 16px;
+  height: 16px;
+  border: 1px solid #ccc;
+  background-color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.pmp-checkbox-box.checked {
+  border: 1px solid #E53E3E;
+  background-color: #E53E3E;
+}
+
+.pmp-category-select-btn {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 12px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+.pmp-category-summary {
+  margin-bottom: 8px;
+}
+
+.pmp-clear-categories-btn {
+  font-size: 11px;
+  color: #4c9eec;
+  text-decoration: none;
+}
+
+.pmp-category-count {
+  font-size: 11px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.pmp-price-input {
+  width: 100%;
+  height: 30px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0 8px;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.pmp-price-apply-btn {
+  width: 100%;
+  padding: 6px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}

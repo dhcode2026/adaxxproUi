@@ -1,0 +1,645 @@
+/* Custom Scrollbar for Manage Campaign Table Scroll Container (Horizontal Scrollbar) */
+.cd-table-scroll-container::-webkit-scrollbar {
+  width: 6px !important;
+  height: 6px !important;
+}
+
+.cd-table-scroll-container::-webkit-scrollbar-track {
+  background: #e0e0e0 !important;
+  border-radius: 4px !important;
+}
+
+.cd-table-scroll-container::-webkit-scrollbar-thumb {
+  background: #888 !important;
+  border-radius: 4px !important;
+}
+
+.cd-table-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #555 !important;
+}
+
+/* Keep the campaign list inside its own scroll host so the page does not grow endlessly */
+.cd-data-table-wrapper {
+  max-height: none !important;
+}
+
+.cd-table-scroll-container {
+  max-height: none !important;
+  overflow-y: visible !important;
+  overflow-x: auto !important;
+}
+
+.cd-data-table-empty-state {
+  padding: 28px 16px !important;
+  text-align: center !important;
+  color: #6b7280 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  background: #fff !important;
+}
+
+/* Layout bar (cd-filters-bar) styles for all screens */
+.cd-filters-bar {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  width: 100% !important;
+  padding: 12px 16px !important;
+  background: #ffffff !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+.cd-filters-left {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+.cd-filters-right {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 10px !important;
+  justify-content: flex-end !important;
+  flex: 0 1 auto !important;
+}
+
+.cd-filters-bottom-row {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  flex: 0 0 auto !important;
+}
+
+/* Search Wrapper & Input */
+.cd-search-wrapper {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  flex: 0 1 240px !important;
+  min-width: 150px !important;
+}
+
+.cd-search-input {
+  width: 100% !important;
+  height: 38px !important;
+  padding: 6px 12px 6px 32px !important;
+  font-size: 13px !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 6px !important;
+  outline: none !important;
+  background-color: #fff !important;
+  color: #374151 !important;
+}
+
+.cd-search-icon {
+  position: absolute !important;
+  left: 10px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  color: #9ca3af !important;
+  pointer-events: none !important;
+}
+
+/* Checkbox and Label styles */
+.cd-sort-group {
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+}
+
+.cd-active-filter {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: #374151 !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  white-space: nowrap !important;
+}
+
+.cd-table-checkbox {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 4px !important;
+  border: 2px solid #d1d5db !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  background-color: #fff !important;
+}
+
+.cd-table-checkbox-checked {
+  background-color: #e73c32 !important;
+  border-color: #e73c32 !important;
+}
+
+.cd-table-checkbox-icon {
+  color: #ffffff !important;
+  font-size: 10px !important;
+}
+
+/* Pagination summary, controls, and selects */
+.cd-pagination-summary {
+  font-size: 13px !important;
+  color: #6b7280 !important;
+  white-space: nowrap !important;
+  margin-left: 4px !important;
+}
+
+.cd-select-dropdown {
+  height: 38px !important;
+  font-size: 13px !important;
+  color: #374151 !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 6px !important;
+  padding: 0 30px 0 12px !important;
+  box-sizing: border-box !important;
+}
+
+.cd-pagination-toolbar {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
+}
+
+.cd-pagination-controls {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  gap: 4px !important;
+}
+
+.cd-pagination-nav-btn,
+.cd-pagination-page-btn {
+  height: 30px !important;
+  min-width: 32px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid #e5e7eb !important;
+  background-color: #fff !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  font-size: 13px !important;
+  color: #374151 !important;
+  padding: 0 8px !important;
+}
+.cd-pagination-nav-btn-cam,
+.cd-pagination-page-btn-cam {
+  height: 38px !important;
+  min-width: 32px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid #e5e7eb !important;
+  background-color: #fff !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  font-size: 13px !important;
+  color: #374151 !important;
+  padding: 0 8px !important;
+}
+
+.cd-pagination-page-btn.is-active {
+  background-color: #e73c32 !important;
+  color: #ffffff !important;
+  border-color: #e73c32 !important;
+}
+.cd-pagination-page-btn-cam.is-active {
+  background-color: #e73c32 !important;
+  color: #ffffff !important;
+  border-color: #e73c32 !important;
+}
+
+.cd-pagination-select {
+  height: 38px !important;
+  border-radius: 6px !important;
+  border: 1px solid #e5e7eb !important;
+  /* padding: 0 10px !important; */
+  background-color: #fff !important;
+  font-size: 13px !important;
+  color: #374151 !important;
+  outline: none !important;
+  cursor: pointer !important;
+}
+
+.cd-btn,
+.cd-btn-default,
+.cd-btn-primary,
+.cd-date-range-button {
+  height: 30px !important;
+  padding: 8px 14px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  border-radius: 6px !important;
+  border: 1px solid #e5e7eb !important;
+  background-color: #fff !important;
+  color: #374151 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  transition: all 0.2s ease !important;
+}
+
+.cd-btn-primary {
+  background-color: #e73c32 !important;
+  border-color: #e73c32 !important;
+  color: #ffffff !important;
+}
+
+.cd-btn-primary:hover {
+  background-color: #d13027 !important;
+  border-color: #d13027 !important;
+}
+
+/* Keep the toolbar above the table on a single row for desktop screens */
+@media (min-width: 1281px) {
+  .cd-filters-bar {
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+
+  .cd-filters-left {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .cd-filters-right {
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .cd-filters-bottom-row {
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .cd-search-wrapper {
+    flex: 0 1 215px !important;
+    min-width: 0 !important;
+  }
+
+  .cd-search-input {
+    width: clamp(160px, 15vw, 230px) !important;
+    max-width: 100% !important;
+  }
+
+  .cd-sort-group {
+    flex: 0 0 auto !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .cd-pagination-toolbar {
+    flex: 0 0 auto !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    margin-left: auto !important;
+  }
+
+  .cd-pagination-controls {
+    flex-wrap: nowrap !important;
+  }
+
+  .cd-add-campaign-wrapper {
+    flex: 0 0 auto !important;
+  }
+
+  .cd-btn,
+  .cd-btn-default,
+  .cd-btn-primary,
+  .cd-date-range-button,
+  .cd-pagination-select {
+    white-space: nowrap !important;
+  }
+
+  .cd-btn,
+  .cd-btn-default {
+    padding: 6px 10px !important;
+  }
+
+  .cd-btn-primary {
+    padding: 7px 12px !important;
+  }
+
+  .cd-pagination-select {
+    min-width: 96px !important;
+  }
+
+  .cd-pagination-summary {
+    white-space: nowrap !important;
+  }
+}
+
+/* The dashboard should size to its content instead of forcing a full viewport page height */
+.cd-dashboard-container {
+  min-height: 0 !important;
+  overflow-y: visible !important;
+}
+
+/* Custom Scrollbar for Main Layout Panel when viewing Manage Campaign */
+.main-panel::-webkit-scrollbar {
+  width: 6px !important;
+  height: 6px !important;
+}
+
+.main-panel::-webkit-scrollbar-track {
+  background: #e0e0e0 !important;
+}
+
+.main-panel::-webkit-scrollbar-thumb {
+  background: #888 !important;
+}
+
+.main-panel::-webkit-scrollbar-thumb:hover {
+  background: #555 !important;
+}
+
+/* Status Dropdown Styles */
+.cd-status-dropdown-btn {
+  min-width: 100px !important;
+  padding: 6px 12px !important;
+  border-radius: 4px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  text-transform: capitalize !important;
+  transition: all 0.2s ease !important;
+  border: none !important;
+  cursor: pointer !important;
+}
+
+.cd-status-dropdown-btn:hover {
+  opacity: 0.85 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.cd-status-dropdown-menu {
+  border: 1px solid #e5e7eb !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  padding: 4px 0 !important;
+}
+
+.cd-status-item {
+  padding: 8px 16px !important;
+  cursor: pointer !important;
+  font-size: 13px !important;
+  transition: background-color 0.2s ease !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.cd-status-item:hover {
+  background-color: #f3f4f6 !important;
+}
+
+.cd-status-item:active {
+  background-color: #e5e7eb !important;
+}
+
+/* Custom responsiveness for laptop screens */
+@media (max-width: 1440px) {
+  .cd-filters-left {
+    width: 100% !important;
+    flex: 1 1 100% !important;
+    justify-content: space-between !important;
+  }
+  .cd-filters-bottom-row {
+    width: 100% !important;
+    flex: 1 1 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .cd-filters-bottom-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+  .cd-filters-right {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+}
+
+/* Full screen blurred loader */
+.cd-full-screen-loader {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background-color: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  z-index: 9999 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  border-radius: inherit !important;
+}
+
+.cd-dashboard-container {
+  position: relative !important;
+  min-height: 100vh !important;
+}
+
+/* SweetAlert styles for Insufficient Funds alert */
+.campaign-swal-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 28px 32px 22px;
+  text-align: center;
+}
+
+.campaign-swal-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  color: #ef4444;
+  background: linear-gradient(180deg, #fff1f2 0%, #ffe4e6 100%);
+  box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.14);
+  margin: 0 auto;
+}
+
+.campaign-swal-icon svg {
+  width: 34px;
+  height: 34px;
+}
+
+.campaign-swal-title {
+  margin: 0;
+  color: #0f172a;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.campaign-swal-message {
+  max-width: 400px;
+  margin: 0;
+  color: #475569;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.campaign-swal-actions.swal2-actions {
+  display: flex !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  margin: 0 !important;
+  padding: 0 32px 28px !important;
+}
+
+.campaign-swal-confirm.swal2-confirm {
+  min-width: 126px !important;
+  margin: 0 !important;
+  padding: 12px 28px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  color: #ffffff !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  box-shadow: 0 12px 24px rgba(220, 38, 38, 0.25) !important;
+}
+
+.campaign-swal-confirm.swal2-confirm:hover {
+  transform: translateY(-1px) !important;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+}
+
+.campaign-swal-confirm.swal2-confirm:focus {
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.16) !important;
+}
+
+.campaign-swal-popup {
+  width: min(520px, calc(100vw - 32px)) !important;
+  border-radius: 22px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.22) !important;
+}
+
+/* Custom SweetAlert buttons matching Campaign Preview button design */
+.campaign-status-confirm-btn {
+  background: #e53e3e !important;
+  border: none !important;
+  color: #ffffff !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 24px !important;
+  border-radius: 13px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+  font-family: inherit !important;
+  white-space: nowrap !important;
+}
+
+.campaign-status-confirm-btn:hover {
+  background: #c53030 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(229, 62, 62, 0.2), 0 2px 4px rgba(229, 62, 62, 0.1) !important;
+}
+
+.campaign-status-confirm-btn:active {
+  transform: translateY(0) !important;
+  box-shadow: none !important;
+}
+
+.campaign-status-cancel-btn {
+  background: #ffffff !important;
+  border: 1px solid #d7dde8 !important;
+  color: #475569 !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 24px !important;
+  border-radius: 13px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+  font-family: inherit !important;
+  white-space: nowrap !important;
+}
+
+.campaign-status-cancel-btn:hover {
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  color: #1e293b !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+}
+
+.campaign-status-cancel-btn:active {
+  transform: translateY(0) !important;
+  box-shadow: none !important;
+}
+
+.campaign-status-swal-actions.swal2-actions {
+  display: flex !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  margin: 0 !important;
+  padding: 0 32px 28px !important;
+}
+
+.campaign-status-swal-popup {
+  border-radius: 18px !important;
+  font-family: inherit !important;
+}

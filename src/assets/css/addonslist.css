@@ -1,0 +1,227 @@
+.addons-list-header-dl {
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+}
+
+.addons-list-title-dl {
+  font-family: "Open Sans", Arial, sans-serif;
+}
+
+.addons-list-card-dl {
+  border-radius: 18px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+.addons-list-card-body-dl {
+  overflow: visible;
+}
+
+.addons-list-controls-dl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.addons-list-search-wrapper-dl {
+  min-width: 180px;
+  position: relative;
+}
+
+.addons-list-search-input-dl {
+  font-size: 0.685rem;
+  height: 30px;
+  font-family: "Open Sans", Arial, sans-serif;
+}
+
+.addons-list-refresh-btn-dl {
+  padding: 4px 12px;
+  font-size: 11px;
+  height: 30px;
+  font-family: "Open Sans", Arial, sans-serif;
+}
+
+.addons-list-pagination-shell-dl {
+  margin-left: auto;
+}
+
+.addons-list-pagination-controls-dl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+.addons-list-pagination-summary-dl {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.addons-list-pagination-toolbar-dl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.addons-list-pagination-inner-dl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.addons-list-pagination-nav-btn-dl {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+}
+
+.addons-list-pagination-nav-btn-dl:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.addons-list-pagination-page-btn-dl {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+  background-color: #fff;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: default;
+}
+
+.addons-list-pagination-page-btn-dl.is-active {
+  border: none;
+  background-color: #dc2626;
+  color: white;
+}
+
+.addons-list-pagination-label-dl {
+  color: #64748b;
+  font-size: 13px;
+  margin: 0 4px;
+  font-weight: 500;
+}
+
+.addons-list-per-page-wrapper-dl {
+  position: relative;
+  min-width: 120px;
+  z-index: 100;
+}
+
+.addons-list-select-wrapper-dl {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.addons-list-select-input-dl {
+  height: 38px;
+  min-height: 38px;
+  border-radius: 13px;
+  padding: 10px 34px 10px 12px;
+}
+
+.addons-list-export-btn-dl {
+  padding: 4px 12px;
+  font-size: 11px;
+  background-color: #dc2626 !important;
+  color: white;
+  border-color: #dc2626 !important;
+  height: 30px;
+}
+
+.addons-list-create-btn-dl {
+  padding: 4px 12px;
+  font-size: 11px;
+  background-color: #0ea5e9 !important;
+  color: white;
+  border-color: #0ea5e9 !important;
+  height: 30px;
+}
+
+.addons-list-table-shell-dl {
+  border: 1px solid #e6ebf2;
+  border-radius: 14px;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 70vh;
+}
+
+.addons-list-table-inner-dl {
+  min-width: 1000px;
+}
+
+.addons-list-access-denied-dl {
+  margin: 20px;
+}
+
+.addons-list-nav-chevron-left-dl {
+  transform: rotate(180deg);
+  font-size: 12px;
+}
+
+.addons-list-nav-chevron-right-dl {
+  font-size: 12px;
+}
+
+.addons-action-menu-dl {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.addons-action-icon-dl {
+  margin-right: 5px;
+}
+
+.addons-action-arrow-dl {
+  transition: transform 0.2s ease;
+}
+
+.addons-action-arrow-dl.rotate-dl {
+  transform: rotate(180deg);
+}
+
+.addons-action-arrow-dl:not(.rotate-dl) {
+  transform: rotate(0deg);
+}
+
+.addons-dropdown-menu-dl {
+  position: absolute;
+  top: var(--dropdown-top, 0px);
+  left: var(--dropdown-left, 0px);
+  z-index: 9999;
+  min-width: 120px;
+  pointer-events: auto;
+}
+
+.addons-dropdown-option-dl {
+  height: 40px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.option-style-dl {
+  height: 40px;
+  cursor: pointer;
+  pointer-events: auto;
+}
