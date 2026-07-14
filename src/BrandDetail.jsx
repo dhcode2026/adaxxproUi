@@ -18,7 +18,7 @@ const BrandDetail = () => {
   const location = useLocation();
   
   // Decode URL parameter
-  const decodedBrandName = decodeURIComponent(brandName);
+  const decodedBrandName = decodeURIComponent(brandName); 
   
   // State
   const [loading, setLoading] = useState(true);
