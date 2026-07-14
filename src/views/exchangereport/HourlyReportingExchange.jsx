@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { FaCalendarAlt, FaChevronDown, FaChevronRight, FaDownload } from "react-icons/fa";
 import DataTable from "react-data-table-component";
 import { Card , CardBody } from "reactstrap";
@@ -14,6 +14,7 @@ import "react-datepicker/dist/react-datepicker.css";
 
 const HourlyReportingExchange = ({ exchangeName: propExchangeName, exchangeId: propExchangeId }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const {
     exchangeName: stateExchangeName,
     exchangeId: stateExchangeId,
@@ -398,18 +399,8 @@ const HourlyReportingExchange = ({ exchangeName: propExchangeName, exchangeId: p
       sortable: true,
       format: (row) => formatWithComma(row.impressions),
     },
-    {
-      name: "Revenue",
-      selector: (row) => row.revenue || 0,
-      sortable: true,
-      format: (row) => `$${row.revenue.toFixed(2)}`,
-    },
-    {
-      name: "Media eCPM",
-      selector: (row) => row.mediaEcpm || 0,
-      sortable: true,
-      format: (row) => `$${(isFinite(Number(row.mediaEcpm)) ? Number(row.mediaEcpm) : 0).toFixed(2)}`,
-    },
+  
+  
     {
       name: "Clicks",
       selector: (row) => row.clicks || 0,
@@ -483,8 +474,16 @@ const customStyles = {
             <div className="campaign-daily-content">
               <div className="campaign-daily-header" style={{ borderBottom: "none", paddingBottom: 0 }}>
                 <div>
-                  <div className="campaign-daily-title">
-                    <h2>Hourly Reporting</h2>
+                  <div className="campaign-daily-title" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <button 
+                      onClick={() => navigate(-1)} 
+                      className="campaign-btn campaign-btn-back" 
+                      style={{ padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <i className="fa fa-arrow-left"></i>
+                      Back
+                    </button>
+                    <h2 style={{ margin: 0 }}>Hourly Reporting</h2>
                   </div>
                 </div>
               </div>

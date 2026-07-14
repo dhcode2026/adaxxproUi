@@ -16,7 +16,6 @@ function getCurrentToken() {
     return null;
   }
 }
-
 function getCurrentUserId() {
   try {
     return localStorage.getItem("userId");
@@ -24,7 +23,6 @@ function getCurrentUserId() {
     return null;
   }
 }
-
 function getUserRoles() {
   try {
     const rolesStr = localStorage.getItem("roles");

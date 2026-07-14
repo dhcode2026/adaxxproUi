@@ -103,7 +103,23 @@ const InventoryModal = ({ isOpen, toggle, handlelocation, selectedData }) => {
   const [inventoryRow, setInventoryRow] = useState([])
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 20;
-  const totalPages = Math.ceil(inventoryData.length / rowsPerPage);
+
+  const filteredInventoryData = useMemo(() => {
+    if (!inventorySearchTerm) return inventoryData;
+    const term = inventorySearchTerm.toLowerCase();
+    return inventoryData.filter((item) => {
+      const nameMatch = item.name && item.name !== "Unknown" && item.name.toLowerCase().includes(term);
+      const domainMatch = item.domain && item.domain !== "-" && item.domain.toLowerCase().includes(term);
+      const subIdMatch = item.subId && item.subId.toString().toLowerCase().includes(term);
+      return nameMatch || domainMatch || subIdMatch;
+    });
+  }, [inventoryData, inventorySearchTerm]);
+
+  const totalPages = Math.ceil(filteredInventoryData.length / rowsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [inventorySearchTerm]);
 
 
 
@@ -1679,7 +1695,7 @@ const InventoryModal = ({ isOpen, toggle, handlelocation, selectedData }) => {
                       </Row>
                       <DataTable
                         columns={inventoryColumns}
-                        data={inventoryData}
+                        data={filteredInventoryData}
                         progressPending={loading}
                         progressComponent={<CustomLoader />}
                         striped dense fixedHeader fixedHeaderScrollHeight="48vh" highlightOnHover persistTableHead
@@ -1728,7 +1744,7 @@ const InventoryModal = ({ isOpen, toggle, handlelocation, selectedData }) => {
                     ></i>
                   </div>
                   <div className="border-left-default pl-12">
-                    {inventoryData.length} results ({selectedInventoryIds.length} selected)
+                    {filteredInventoryData.length} results ({selectedInventoryIds.length} selected)
                   </div>
                 </div>
               </>

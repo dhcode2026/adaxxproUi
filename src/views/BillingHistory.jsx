@@ -5,7 +5,7 @@ import DataTable from "react-data-table-component";
 import { useGlobalTabs } from "../context/TabContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSync, faDownload, faChevronRight, faChevronDown, faPlus, faCaretDown } from "@fortawesome/free-solid-svg-icons";
-import { getBillings, createBilling, getAlladvertiserLogin, updateBilling, updateBillingStatus, getAllBillingHistory } from "./api/Api";
+import { createBilling, getAlladvertiserLogin, updateBilling, updateBillingStatus, getAllBillingHistory } from "./api/Api";
 import { canCreate, canApprove, canView } from "../utils/permissionHelper";
 import logo from "../assets/img/adxpro.png";
 
@@ -140,7 +140,7 @@ const perPageOptions = [
 const formatCurrency = (val) => {
   if (val === null || val === undefined || val === "-" || isNaN(Number(val))) return "-";
   const num = Number(val);
-  return new Intl.NumberFormat("en-IN", {
+  return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
   }).format(num);
@@ -279,9 +279,14 @@ const BillingHistory = () => {
   const fetchBillings = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await getBillings();
+      const response = await getAllBillingHistory();
       if (response && response.data) {
-        const rawData = response.data.data?.informationBillings || (Array.isArray(response.data) ? response.data : []);
+        const rawData =
+          response.data.data?.informationBillingHistory ||
+          response.data.informationBillingHistory ||
+          response.data.data?.informationBillings ||
+          response.data.informationBillings ||
+          (Array.isArray(response.data) ? response.data : []);
         const mappedData = rawData.map((item, index) => {
           let fundValue = 0;
           if (item.totalFund !== null && item.totalFund !== undefined && item.totalFund !== 0) {
@@ -305,10 +310,16 @@ const BillingHistory = () => {
 
           return {
             sno: index + 1,
-            id: item.id,
+            id: item.billingHistoryId ?? item.id,
             userId: item.userId,
             advertiserId: item.advertiserId,
             agencyName: item.name || "-",
+            userName: item.userName || item.name || "-",
+            campaignName: item.campaignName || "-",
+            fundAdd: formatCurrency(item.fundAdd),
+            totalFund: formatCurrency(item.totalFund),
+            fundSub: formatCurrency(item.fundSub),
+            availableFund: formatCurrency(item.availableFund),
             fund: formattedFund,
             rawFund: fundValue,
             addedAt: formatDateTime(item.createdAt),
@@ -316,7 +327,8 @@ const BillingHistory = () => {
               const rawStatus = item.status || item.xstatus || "Pending";
               return rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
             })(),
-            approvedBy: item.approvedBy || "-",
+            statusUpdatedBy: item.statusUpdatedBy || item.approvedBy || "-",
+            approvedBy: item.statusUpdatedBy || item.approvedBy || "-",
             approvedAt: formatDateTime(item.approvedAt),
             comments: item.comments || "",
           };
@@ -485,6 +497,7 @@ const BillingHistory = () => {
   };
 
   const handleOpenStatusModal = useCallback((row) => {
+    if (row.status.toLowerCase() !== "pending") return;
     setSelectedRow(row);
     setStatusValue(row.status);
     setStatusComments(row.comments || "");
@@ -564,9 +577,9 @@ const BillingHistory = () => {
       }
 
       const payload = {
-        id: selectedRow.id,
+        billingHistoryId: selectedRow.id,
         status: statusValue.toLowerCase(),
-        statusComments: statusComments || "",
+        userId: Number(selectedRow.userId),
       };
 
       const response = await updateBillingStatus(payload);
@@ -639,39 +652,53 @@ const BillingHistory = () => {
       },
       {
         name: "Advertiser Name",
-        selector: (row) => row.agencyName,
+        selector: (row) => row.userName,
         sortable: true,
         minWidth: "150px",
         grow: 1,
       },
       {
-        name: "Fund",
-        selector: (row) => row.fund,
+        name: "Campaign Name",
+        selector: (row) => row.campaignName,
         sortable: true,
-        width: "180px",
-        cell: (row) => (
-          <strong
-            title={row.fund}
-            style={{
-              textOverflow: "ellipsis",
-              overflow: "hidden",
-              whiteSpace: "nowrap",
-              display: "block",
-              maxWidth: "100%",
-            }}
-          >
-            {row.fund}
-          </strong>
-        ),
+        minWidth: "150px",
+        grow: 1,
       },
-    
+      {
+        name: "Credited Fund",
+        selector: (row) => row.fundAdd,
+        sortable: true,
+        width: "120px",
+        cell: (row) => <span className="fw-semibold">{row.fundAdd}</span>,
+      },
+      {
+        name: "Total Fund",
+        selector: (row) => row.totalFund,
+        sortable: true,
+        width: "120px",
+        cell: (row) => <span className="fw-semibold">{row.totalFund}</span>,
+      },
+      {
+        name: "Debited Fund",
+        selector: (row) => row.fundSub,
+        sortable: true,
+        width: "120px",
+        cell: (row) => <span className="fw-semibold">{row.fundSub}</span>,
+      },
+      {
+        name: "Available Fund",
+        selector: (row) => row.availableFund,
+        sortable: true,
+        width: "130px",
+        cell: (row) => <span className="fw-semibold text-success">{row.availableFund}</span>,
+      },
       {
         name: "Status",
         selector: (row) => row.status,
         sortable: true,
         width: "135px",
         cell: (row) => (
-          (canApproveFund && row.status.toLowerCase() !== "approved") ? (
+          (canApproveFund && row.status.toLowerCase() === "pending") ? (
             <button
               type="button"
               className="onoffbutton"
@@ -715,9 +742,9 @@ const BillingHistory = () => {
       },
       {
         name: "Approved By",
-        selector: (row) => row.approvedBy,
+        selector: (row) => row.statusUpdatedBy,
         sortable: true,
-        width: "180px",
+        width: "160px",
       },
       {
         name: "Approved At",
@@ -739,7 +766,7 @@ const BillingHistory = () => {
       table: {
         style: {
           backgroundColor: "#fff",
-          minWidth: "1000px",
+          minWidth: "1400px",
         },
       },
       headRow: {
@@ -1018,7 +1045,7 @@ const BillingHistory = () => {
 
         <div className="campaign-daily-table-wrapper">
           <div style={{ border: "1px solid #e6ebf2", borderRadius: "14px", overflowX: "auto", overflowY: "auto", maxHeight: "70vh" }}>
-            <div style={{ minWidth: "1000px" }}>
+            <div style={{ minWidth: "1400px" }}>
               <DataTable
                 className="data-table"
                 columns={columns}
@@ -1106,11 +1133,11 @@ const BillingHistory = () => {
           <Form onSubmit={handleSaveStatus}>
             <ModalBody>
               <FormGroup>
-                <Label for="statusAgencyName">Agency Name</Label>
+                <Label for="statusAgencyName">Advertiser Name</Label>
                 <Input
                   type="text"
                   id="statusAgencyName"
-                  value={selectedRow ? selectedRow.agencyName : ""}
+                  value={selectedRow ? (selectedRow.userName || selectedRow.agencyName || "") : ""}
                   readOnly
                   disabled
                 />
@@ -1121,10 +1148,8 @@ const BillingHistory = () => {
                   type="number"
                   id="statusFundAmount"
                   value={statusFund}
-                  onChange={(e) => setStatusFund(e.target.value)}
-                  step="0.01"
-                  min="0.01"
-                  required
+                  readOnly
+                  disabled
                 />
               </FormGroup>
               <FormGroup>

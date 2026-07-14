@@ -4076,7 +4076,7 @@ const Location = (props) => {
             <Col md="8" sm="12" style={{ minWidth: 0 }}>
               <div>
                 <p className="selected_codinates">Selected Coordinates</p>
-                <div className="d-flex align-items-center gap-2 me-5 radius_units_div mb-3">
+                {/* <div className="d-flex align-items-center gap-2 me-5 radius_units_div mb-3">
                   <p id="radius_units " className="mt-3 radius_units">
                     Radius Units
                   </p>
@@ -4108,7 +4108,7 @@ const Location = (props) => {
                   >
                     Bulk Edit
                   </button>
-                </div>
+                </div> */}
                 <div
                   style={{
                     width: "100%",

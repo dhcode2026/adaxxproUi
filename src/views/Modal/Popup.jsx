@@ -132,21 +132,28 @@ const Popup = ({
         }
         .onoffbutton {
           white-space: nowrap !important;
-          border-radius: 999px;
+          border-radius: 8px;
           border: 1px solid transparent;
-          padding: 0.55rem 1rem;
+          padding: 0 16px;
+          height: 34px;
           font-weight: 600;
-          min-width: 132px;
+          min-width: 128px;
+          font-size: 14px;
+          line-height: 1;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
         }
         .onoffbutton.status-runnable {
-          background-color: #16a34a !important;
+          background-color: #10b981 !important;
           border-color: #16a34a !important;
           color: #fff !important;
         }
         .onoffbutton.status-runnable:hover,
         .onoffbutton.status-runnable:focus,
         .onoffbutton.status-runnable:active {
-          background-color: #15803d !important;
+          background-color: #10b981 !important;
           border-color: #15803d !important;
           color: #fff !important;
         }
@@ -287,7 +294,10 @@ const Popup = ({
                       alignItems: "center",
                       justifyContent: "center",
                       cursor: updating ? "not-allowed" : "pointer",
-                      gap: "8px",
+                      gap: "6px",
+                      padding: "0 16px",
+                      height: "34px",
+                      minWidth: "128px",
                     }}
                   >
                     {updating ? (
@@ -380,15 +390,19 @@ const Popup = ({
                   className={`onoffbutton ${statusClass}`}
                   onClick={() => handlepopupopen(normalizedStatus || "runnable")}
                   disabled={updating}
-                  style={{
-                    position: "relative",
-                    opacity: updating ? 0.7 : 1,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: updating ? "not-allowed" : "pointer",
-                  }}
-                >
+                    style={{
+                      position: "relative",
+                      opacity: updating ? 0.7 : 1,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: updating ? "not-allowed" : "pointer",
+                      gap: "6px",
+                      padding: "0 16px",
+                      height: "34px",
+                      minWidth: "128px",
+                    }}
+                  >
                   {updating ? (
                     <span
                       className="spinner-border spinner-border-sm me-2"

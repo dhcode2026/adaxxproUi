@@ -722,7 +722,7 @@ const NoDatadomainComponent = () => (
           </div>
 
           <Row className="mt-3 mx-0 px-3">
-            <Col className="pr-md-1" md="2">
+            <Col className="pr-md-1" md="12">
               <Label className="mt-2">Supply Path Optimization</Label>
             </Col>
           </Row>
@@ -768,7 +768,7 @@ const NoDatadomainComponent = () => (
           </Col>
 
           <Row className="mt-3 ms-3">
-            <Col className="pr-md-1" md="2">
+            <Col className="pr-md-1" md="12">
               <Label className="mt-2">Supply Quality Filtering</Label>
             </Col>
           </Row>

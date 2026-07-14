@@ -285,7 +285,7 @@ const ExchangeModal = ({ isOpen, toggle, onSave, saving, existingExchanges = [],
                     className=" mb-0 cursor-pointer"
                     style={{ fontSize: "13px", fontWeight: 500, color: "#475569" }}
                   >
-                    02.5
+                    2.5
                   </Label>
                 </FormGroup>
                 <FormGroup check className="d-flex align-items-center gap-2 ps-0 mb-0">
@@ -304,7 +304,7 @@ const ExchangeModal = ({ isOpen, toggle, onSave, saving, existingExchanges = [],
                     className=" mb-0 cursor-pointer"
                     style={{ fontSize: "13px", fontWeight: 500, color: "#475569" }}
                   >
-                    02.6
+                    2.6
                   </Label>
                 </FormGroup>
               </div>

@@ -54,6 +54,7 @@ function DonutChart({ title, data, onSliceClick, onBack, selected, activeName, o
   const [hoveredName, setHoveredName] = useState(null);
   const [hoverPos, setHoverPos] = useState(null);
   const [pinnedName, setPinnedName] = useState(null);
+  const wrapperRef = useRef(null);
 
   const total = !data || data.length === 0 ? 0 : data.reduce((s, d) => s + (d.value || 0), 0);
   const isNoData = !data || data.length === 0 || total === 0 || (data.length === 1 && data[0].name === "No Data");
@@ -140,7 +141,7 @@ function DonutChart({ title, data, onSliceClick, onBack, selected, activeName, o
 
 
 
-      <div className="db-donut-chart-wrapper">
+      <div className="db-donut-chart-wrapper" ref={wrapperRef}>
         {isLoading ? (
           <div style={{ minHeight: "200px", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <div style={{ width: "30px", height: "30px", borderRadius: "50%", border: "3px solid #e2e8f0", borderTopColor: "#3b82f6", animation: "spin 1s linear infinite" }}>
@@ -196,12 +197,18 @@ function DonutChart({ title, data, onSliceClick, onBack, selected, activeName, o
                         setPinnedName((prev) => (prev === s.name ? null : s.name));
                         onSliceClick?.(s.name);
                       }}
-                      onMouseEnter={() => {
+                      onMouseEnter={(e) => {
                         setHoveredName(s.name);
-                        const angle = (s.startAngle + s.endAngle) / 2;
-                        const hx = cx + Math.cos(angle) * (r * 0.8);
-                        const hy = cy + Math.sin(angle) * (r * 0.8);
-                        setHoverPos({ x: hx, y: hy });
+                        if (wrapperRef.current) {
+                          const rect = wrapperRef.current.getBoundingClientRect();
+                          setHoverPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+                        }
+                      }}
+                      onMouseMove={(e) => {
+                        if (wrapperRef.current) {
+                          const rect = wrapperRef.current.getBoundingClientRect();
+                          setHoverPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+                        }
                       }}
                       onMouseLeave={() => {
                         setHoveredName(null);

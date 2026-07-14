@@ -50,6 +50,7 @@ function DonutChart({ title, data, onSliceClick, onBack, selected, activeName, o
   const [hoveredName, setHoveredName] = useState(null);
   const [hoverPos, setHoverPos] = useState(null);
   const [pinnedName, setPinnedName] = useState(null);
+  const wrapperRef = React.useRef(null);
 
   const total = !data || data.length === 0 ? 0 : data.reduce((s, d) => s + (d.value || 0), 0);
   const isNoData = !data || data.length === 0 || total === 0 || (data.length === 1 && data[0].name === "No Data");
@@ -116,7 +117,7 @@ function DonutChart({ title, data, onSliceClick, onBack, selected, activeName, o
         </div>
       </div>
 
-      <div className="ad-spending-chart-wrapper">
+      <div className="ad-spending-chart-wrapper" ref={wrapperRef} style={{ position: "relative", width: "200px", margin: "0 auto" }}>
         {isLoading ? (
           <div className="ad-spending-loading">
             <div className="ad-spending-spinner"></div>
@@ -175,12 +176,18 @@ function DonutChart({ title, data, onSliceClick, onBack, selected, activeName, o
                         setPinnedName((prev) => (prev === s.name ? null : s.name));
                         onSliceClick?.(s.name);
                       }}
-                      onMouseEnter={() => {
+                      onMouseEnter={(e) => {
                         setHoveredName(s.name);
-                        const angle = (s.startAngle + s.endAngle) / 2;
-                        const hx = cx + Math.cos(angle) * (r * 0.8);
-                        const hy = cy + Math.sin(angle) * (r * 0.8);
-                        setHoverPos({ x: hx, y: hy });
+                        if (wrapperRef.current) {
+                          const rect = wrapperRef.current.getBoundingClientRect();
+                          setHoverPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+                        }
+                      }}
+                      onMouseMove={(e) => {
+                        if (wrapperRef.current) {
+                          const rect = wrapperRef.current.getBoundingClientRect();
+                          setHoverPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+                        }
                       }}
                       onMouseLeave={() => {
                         setHoveredName(null);
@@ -225,18 +232,20 @@ function DonutChart({ title, data, onSliceClick, onBack, selected, activeName, o
                 const hoveredItem = data.find((d) => d.name === hoveredName);
                 return (
                   <div
-                    className="ad-donut-tip"
+                    className="donut-tip"
                     style={{
-                      left: Math.min(Math.max(hoverPos.x + 10, 6), 190),
-                      top: Math.max(hoverPos.y - 6, 6),
-                      transform: "translate(0, -100%)",
+                      left: hoverPos.x,
+                      top: hoverPos.y - 12,
+                      transform: "translate(-50%, -100%)",
+                      position: "absolute",
+                      zIndex: 9999,
                     }}
                   >
-                    <div className="ad-spending-tooltip-header">
+                    <div className="ad-spending-tooltip-header" style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 700 }}>
                       <span style={{ width: 8, height: 8, borderRadius: "50%", background: hoveredItem?.color || DONUT_COLOR, boxShadow: "0 0 0 1px rgba(255,255,255,0.35)" }} />
                       {hoveredName}
                     </div>
-                    <div className="ad-spending-tooltip-body">
+                    <div className="ad-spending-tooltip-body" style={{ opacity: 0.9 }}>
                       {(() => {
                         const v = data.find(d => d.name === hoveredName)?.value ?? 0;
                         const pct = (v / (total || 1)) * 100;

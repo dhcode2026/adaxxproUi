@@ -368,8 +368,16 @@ const DailyReportingExchange = () => {
       <div className="campaign-daily-content">
         <div className="campaign-daily-header" style={{ borderBottom: "none", paddingBottom: 0 }}>
           <div>
-            <div className="campaign-daily-title">
-              <h2>Daily Reporting</h2>
+            <div className="campaign-daily-title" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <button 
+                onClick={() => navigate(-1)} 
+                className="campaign-btn campaign-btn-back" 
+                style={{ padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <i className="fa fa-arrow-left"></i>
+                Back
+              </button>
+              <h2 style={{ margin: 0 }}>Daily Reporting</h2>
             </div>
           </div>
         </div>

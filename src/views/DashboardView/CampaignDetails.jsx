@@ -1365,6 +1365,10 @@ export default function CampaignDashboard() {
 
   const userid = localStorage.getItem("userId");
   const [isAdvertiser, setIsAdvertiser] = useState(false);
+  const billingStatusStorageKey = useMemo(
+    () => `campaign-billing-status:${userid || "anonymous"}`,
+    [userid],
+  );
 
   useEffect(() => {
     if (userid) {
@@ -1387,6 +1391,111 @@ export default function CampaignDashboard() {
 
   // Helper function to get campaign ID
   const getCampaignId = useCallback((campaign) => campaign?.id || campaign?.campaignId, []);
+
+  const normalizeBillingStatus = useCallback((value) => {
+    if (value === undefined || value === null || value === "") return null;
+
+    const normalized = String(value).trim().toLowerCase();
+    if (normalized === "1" || normalized === "true" || normalized === "yes") return 1;
+    if (normalized === "0" || normalized === "false" || normalized === "no") return 0;
+
+    const numeric = Number(normalized);
+    return Number.isNaN(numeric) ? value : numeric;
+  }, []);
+
+  const readBillingStatusCache = useCallback(() => {
+    const readStorage = (storage) => {
+      try {
+        const raw = storage.getItem(billingStatusStorageKey);
+        return raw ? JSON.parse(raw) : {};
+      } catch {
+        return {};
+      }
+    };
+
+    return {
+      ...readStorage(localStorage),
+      ...readStorage(sessionStorage),
+    };
+  }, [billingStatusStorageKey]);
+
+  const writeBillingStatusCache = useCallback((nextCache) => {
+    const serialized = JSON.stringify(nextCache || {});
+    try {
+      localStorage.setItem(billingStatusStorageKey, serialized);
+    } catch {
+      // Ignore storage failures and keep the in-memory state working.
+    }
+    try {
+      sessionStorage.setItem(billingStatusStorageKey, serialized);
+    } catch {
+      // Ignore storage failures and keep the in-memory state working.
+    }
+  }, [billingStatusStorageKey]);
+
+  const persistCampaignBillingStatus = useCallback((campaignId, billingStatus) => {
+    const normalizedStatus = normalizeBillingStatus(billingStatus);
+    if (!campaignId || normalizedStatus === null) return;
+
+    const cache = readBillingStatusCache();
+    cache[String(campaignId)] = normalizedStatus;
+    writeBillingStatusCache(cache);
+  }, [normalizeBillingStatus, readBillingStatusCache, writeBillingStatusCache]);
+
+  const hydrateCampaignBillingStatus = useCallback((campaign) => {
+    if (!campaign) return campaign;
+
+    const directBillingStatus = normalizeBillingStatus(
+      campaign.billingStatus ?? campaign.billing_status ?? campaign.billingstatus,
+    );
+    const campaignId = getCampaignId(campaign);
+
+    if (directBillingStatus !== null) {
+      if (campaignId) {
+        persistCampaignBillingStatus(campaignId, directBillingStatus);
+      }
+      return {
+        ...campaign,
+        billingStatus: directBillingStatus,
+      };
+    }
+
+    if (!campaignId) return campaign;
+
+    const cachedBillingStatus = normalizeBillingStatus(
+      readBillingStatusCache()[String(campaignId)],
+    );
+
+    if (cachedBillingStatus === null) return campaign;
+
+    return {
+      ...campaign,
+      billingStatus: cachedBillingStatus,
+    };
+  }, [getCampaignId, normalizeBillingStatus, persistCampaignBillingStatus, readBillingStatusCache]);
+
+  const hasPlatformFee = useCallback((campaign) => {
+    return [campaign?.platformFee, campaign?.platform_fee, campaign?.groupPercentage]
+      .some((value) => Number(value) > 0);
+  }, []);
+
+  const shouldShowPlatformFeeField = useCallback((campaign) => {
+    if (!campaign) return true;
+
+    const billingStatus = normalizeBillingStatus(
+      campaign.billingStatus ?? campaign.billing_status ?? campaign.billingstatus,
+    );
+
+    if (String(billingStatus) === "1") {
+      return false;
+    }
+
+    if (hasPlatformFee(campaign)) {
+      return false;
+    }
+
+    return billingStatus === null || String(billingStatus) === "0";
+  }, [hasPlatformFee, normalizeBillingStatus]);
 
   // Reusable function for status update
   const updateCampaignStatus = useCallback(async (campaign, newStatus, additionalData = {}) => {
@@ -1442,18 +1551,50 @@ export default function CampaignDashboard() {
           return { success: true, insufficientFund: true };
         }
 
+        const findBillingStatus = (obj) => {
+          if (!obj || typeof obj !== "object") return null;
+          if ("billingStatus" in obj) return obj.billingStatus;
+          if (Array.isArray(obj)) {
+            for (const item of obj) {
+              const val = findBillingStatus(item);
+              if (val !== null) return val;
+            }
+          } else {
+            for (const k in obj) {
+              if (Object.prototype.hasOwnProperty.call(obj, k)) {
+                const val = findBillingStatus(obj[k]);
+                if (val !== null) return val;
+              }
+            }
+          }
+          return null;
+        };
+
+        const bStatus = findBillingStatus(res.data);
+        if (bStatus !== null) {
+          persistCampaignBillingStatus(campaignId, bStatus);
+        }
+
         // Update campaigns list
         setCampaigns((prevData) =>
           prevData.map((item) =>
             getCampaignId(item) === getCampaignId(campaign)
-              ? { ...item, status: newStatus }
+              ? {
+                  ...item,
+                  status: newStatus,
+                  ...(bStatus !== null ? { billingStatus: bStatus } : {})
+                }
               : item
           )
         );
 
         // Update selectedCampaign if it's the same campaign
         if (selectedCampaign && getCampaignId(selectedCampaign) === getCampaignId(campaign)) {
-          setSelectedCampaign(prev => ({ ...prev, status: newStatus }));
+          setSelectedCampaign(prev => ({
+            ...prev,
+            status: newStatus,
+            ...(bStatus !== null ? { billingStatus: bStatus } : {})
+          }));
         }
 
         console.log("Status updated successfully");
@@ -1467,13 +1608,13 @@ export default function CampaignDashboard() {
     } finally {
       setPopupLoading(false);
     }
-  }, [userid, selectedCampaign, getCampaignId]);
+  }, [userid, selectedCampaign, getCampaignId, persistCampaignBillingStatus]);
 
   // Handle status change with proper confirmation
   const handleStatusChange = useCallback((campaign, newStatus) => {
     // For runnable status, show the popup modal with platform fee and comments
     if (newStatus === "runnable") {
-      setPendingRow(campaign);
+      setPendingRow(hydrateCampaignBillingStatus(campaign));
       setPendingStatus(newStatus);
       setShowPopup(true);
     }
@@ -1609,7 +1750,7 @@ export default function CampaignDashboard() {
         }
       });
     }
-  }, [updateCampaignStatus]);
+  }, [hydrateCampaignBillingStatus, updateCampaignStatus]);
 
   useEffect(() => {
     const hasCreatePermission = canCreate("Manage Campaign");
@@ -2209,25 +2350,25 @@ export default function CampaignDashboard() {
     const response = await getAllCampaigns(buildCampaignPayload([]));
 
     if (response.data && response.status === 200) {
-      const campaignList = normalizeCampaignList(response.data.data || []);
+      const campaignList = normalizeCampaignList(response.data.data || []).map(hydrateCampaignBillingStatus);
       setCampaigns(campaignList);
       return campaignList;
     }
 
     throw new Error("Failed to load campaigns");
-  }, [buildCampaignPayload, normalizeCampaignList]);
+  }, [buildCampaignPayload, hydrateCampaignBillingStatus, normalizeCampaignList]);
 
   const fetchCampaignById = useCallback(async (campaignId) => {
     const response = await getAllCampaigns(buildCampaignPayload([campaignId]));
 
-    if (response.data && response.status === 200) {
-      const campaignRows = response.data.data || [];
-      setCampaignChartRows(campaignRows);
+      if (response.data && response.status === 200) {
+        const campaignRows = response.data.data || [];
+        setCampaignChartRows(campaignRows);
 
-      const campaignList = normalizeCampaignList(campaignRows);
-      const matchedCampaign = campaignList.find(
-        (campaign) => String(getCampaignId(campaign)) === String(campaignId),
-      );
+        const campaignList = normalizeCampaignList(campaignRows).map(hydrateCampaignBillingStatus);
+        const matchedCampaign = campaignList.find(
+          (campaign) => String(getCampaignId(campaign)) === String(campaignId),
+        );
       if (matchedCampaign) {
         setSelectedCampaign(matchedCampaign);
       }
@@ -2235,7 +2376,7 @@ export default function CampaignDashboard() {
     }
 
     throw new Error("Failed to load campaign");
-  }, [buildCampaignPayload, normalizeCampaignList, getCampaignId]);
+  }, [buildCampaignPayload, getCampaignId, hydrateCampaignBillingStatus, normalizeCampaignList]);
 
   const fetchCampaigns = useCallback(async () => {
     const startTime = Date.now();
@@ -2856,7 +2997,7 @@ export default function CampaignDashboard() {
             status={pendingStatus}
             isLoading={popupLoading}
             setpayload={setstatusdata}
-            show={!pendingRow || !(parseFloat(pendingRow.platformFee) > 0 || parseFloat(pendingRow.platform_fee) > 0 || parseFloat(pendingRow.groupPercentage) > 0)}
+            show={!pendingRow || shouldShowPlatformFeeField(pendingRow)}
             onConfirm={async (data) => {
               if (pendingRow) {
                 try {
