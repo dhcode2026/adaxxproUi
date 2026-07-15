@@ -235,7 +235,7 @@ export default function CampaignDailyInsights() {
   const [rawData, setRawData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-    const CustomLoader = () => (
+  const CustomLoader = () => (
     <div className="cdi-custom-loader">
       <div className="loader" role="status"></div>
       <span className="ms-2 fw-bold">Loading...</span>
@@ -246,11 +246,11 @@ export default function CampaignDailyInsights() {
     { id: "campaign", label: "Campaign" },
     { id: "geo", label: "Geo" },
     { id: "date", label: "Date" },
-    // { id: "publisherid", label: "Publisher ID" },
-    //   { id: "publishername", label: "Publisher Name" },
+    { id: "publisherId", label: "Publisher ID" },
+    { id: "publisherName", label: "Publisher Name" },
 
   ];
-  const [groupBy, setGroupBy] = useState([]);
+  const [groupBy, setGroupBy] = useState(["campaign"]);
   const [isGroupMenuOpen, setIsGroupMenuOpen] = useState(false);
   const [groupSearch, setGroupSearch] = useState("");
   const groupMenuRef = useRef(null);
@@ -313,7 +313,7 @@ export default function CampaignDailyInsights() {
                   campaign: camp.campaignName,
                   date: camp.date || exchange.date || mainObj.date || "Unknown",
                   geo: camp.geo || exchange.geo || mainObj.geo || "Unknown",
-                  publisherId: camp.publisherId || exchange.publisherId || "Unknown",
+                  publisherId: camp.publisherId || exchange.exchangeUniqueId || exchange.publisherId || "Unknown",
                   impressions: camp.totalImpressions || 0,
                   clicks: camp.totalClicks || 0,
                   installs: camp.totalConversion || 0,
@@ -556,12 +556,7 @@ export default function CampaignDailyInsights() {
   };
 
   const flatTreeData = flattenTree(treeData);
-  const dataTableData = [
-    {
-      _isTotal: true,
-      _level: 0,
-      ...totals
-    },
+  const dataTableData = (groupBy.length === 0 && !selectedCampaignFilter) ? [] : [
     ...flatTreeData
   ];
 
@@ -874,7 +869,7 @@ export default function CampaignDailyInsights() {
             <div className={`cdi-table-shell ${isLoading ? 'is-loading' : 'not-loading'}`}>
               <div className="cdi-table-inner">
                 <DataTable
-                  keyField="id"
+                  keyField="_nodeId"
                   className="data-table"
                   columns={dataTableColumns}
                   data={dataTableData}
@@ -889,6 +884,10 @@ export default function CampaignDailyInsights() {
                   noDataComponent={
                     isLoading ? (
                       <div className="cdi-no-data-placeholder" />
+                    ) : (groupBy.length === 0 && !selectedCampaignFilter) ? (
+                      <div className="py-5 text-center text-secondary">
+                        Please select a campaign from Filters to view data
+                      </div>
                     ) : (
                       <div className="py-5 text-center text-secondary">
                         No data available

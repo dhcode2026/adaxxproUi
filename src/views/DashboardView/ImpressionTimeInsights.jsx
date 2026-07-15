@@ -336,7 +336,8 @@ export default function ImpressionsDashboard({ overviewDataRaw, selectedChannel,
   const [internalLoading, setInternalLoading] = useState(false);
 
 
-  const [activeMetrics, setActiveMetrics] = useState(["impressions", "clicks", "installs", "conversions", "events", "cr"]);
+  // const [activeMetrics, setActiveMetrics] = useState(["impressions", "clicks", "installs", "conversions", "events", "cr"]);
+  const [activeMetrics, setActiveMetrics] = useState(["impressions", "clicks"]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -424,14 +425,9 @@ export default function ImpressionsDashboard({ overviewDataRaw, selectedChannel,
         entry.imp += (imp || 0);
         entry.clk += (clk || 0);
 
-        // Mock values for the new metrics so the UI displays as requested
-        const mockInstalls = Math.floor((clk || 0) * 0.15);
-        const mockConvs = Math.floor((clk || 0) * 0.05);
-        const mockEvents = Math.floor((clk || 0) * 0.3);
-
-        entry.installs += inst || mockInstalls;
-        entry.conversions += conv || mockConvs;
-        entry.events += ev || mockEvents;
+        entry.installs += (inst || 0);
+        entry.conversions += (conv || 0);
+        entry.events += (ev || 0);
       };
 
       if (selectedCampaign || selectedAdFormat || selectedAd) {

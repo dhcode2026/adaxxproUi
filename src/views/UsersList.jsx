@@ -367,16 +367,12 @@ const UsersList = (props) => {
       return "";
     }
   };
-
-  // Fixed editUser function
   const editUser = async (userId) => {
     console.log("Editing user ID:", userId);
     try {
-      // Find the user from existing rowData instead of making another API call
       const existingUser = rowData.find(user => user.id === userId);
       
       if (existingUser) {
-        // Format user data correctly for the modal
         const formattedUser = {
           id: existingUser.userId || existingUser.id,
           email: existingUser.email || "",
@@ -385,6 +381,8 @@ const UsersList = (props) => {
           roleId: existingUser.roleId || existingUser.originalData?.role?.roleId || "",
           roleName: existingUser.roleName || "",
           status: existingUser.status || 1,
+          companyName: existingUser.companyName || existingUser.originalData?.companyName || "",
+          phoneNumber: existingUser.phoneNumber || existingUser.originalData?.phoneNumber || "",
         };
         
         console.log("Setting user to modal:", formattedUser);
@@ -469,6 +467,8 @@ const UsersList = (props) => {
           updatedAt: item.updatedAt || "",
           roleName: roleName,
           roleId: roleId,
+          companyName: item.companyName || "",
+          phoneNumber: item.phoneNumber || "",
           lastlogin: item.lastlogin || "22/01/2026",
           brand_permission: item.allBrands || false,
           selected_brand_ids: item.brandId || [],
@@ -902,33 +902,20 @@ const customStyles = {
                 style={{ width: '32px',height: '32px', borderRadius: '50%',border: 'none', backgroundColor: '#dc2626',color: 'white',display: 'flex', alignItems: 'center', justifyContent: 'center',fontSize: '14px', fontWeight: '500',cursor: 'default',}}>
                 {currentPage}
               </button>
-              <span style={{ color: '#64748b', fontSize: '13px', margin: '0 4px', fontWeight: '500' }}>of</span>
+              <span className="cd-pagination-separators">of</span>
               <button className="cd-pagination-page-btn" type="button" style={{ width: '32px',  height: '32px',  borderRadius: '50%',  border: '1px solid #e2e8f0',  backgroundColor: '#fff',  color: '#64748b',  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: '500',  cursor: 'default', }}  >
                 {totalPages}
               </button>
               <button  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}  disabled={currentPage >= totalPages}  className="cd-pagination-nav-btn"  type="button"  style={{ width: '30px', height: '30px', borderRadius: '50%', border: '1px solid #e2e8f0', backgroundColor: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer', color: '#64748b' }}>
-                <FaChevronRight style={{ fontSize: '12px' }} />
+                <FaChevronRight className="classicon" />
               </button>
-              <div style={{ position: 'relative', marginLeft: '8px' }} ref={perPageRef}>
+              <div className="campaign-select-wrapper1" ref={perPageRef}>
                 <div className="campaign-select-wrapper">
                   <input
                     readOnly
                     value={`${perPage} per page`}
                     className="campaign-select-input"
-                    style={{
-                      height: '30px',
-                      minHeight: '30px',
-                      borderRadius: '6px',
-                      padding: '8px 28px 8px 16px',
-                      border: '1px solid #e2e8f0',
-                      fontSize: '12px',
-                      color: '#1e293b',
-                      fontWeight: '600',
-                      backgroundColor: '#fff',
-                      cursor: 'pointer',
-                      outline: 'none',
-                      maxWidth: '130px',
-                    }}
+                  id="perPageSelect"
                     onClick={() => {
                       setHoveredPerPage(null);
                       setIsPerPageOpen((open) => !open);

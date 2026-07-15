@@ -165,6 +165,9 @@ const DataTableTooltip = ({ active, payload, label, lists }) => {
         dense
         customStyles={customTableStyles}
       />
+      <div style={{ textAlign: 'center', fontSize: '11px', color: '#ef4444', padding: '6px', fontStyle: 'italic', borderTop: '1px solid #f1f5f9' }}>
+        * this is test data only
+      </div>
     </div>
   );
 };

@@ -8,8 +8,9 @@ import { faSync, faDownload, faChevronRight, faChevronDown, faPlus, faCaretDown 
 import { createBilling, getAlladvertiserLogin, updateBilling, updateBillingStatus, getAllBillingHistory } from "./api/Api";
 import { canCreate, canApprove, canView } from "../utils/permissionHelper";
 import logo from "../assets/img/adxpro.png";
+import "./billinghistory.css";
 
-const CustomDropdown = ({ options, value, onChange, placeholder, style, triggerStyle, dropdownStyle }) => {
+const CustomDropdown = ({ options, value, onChange, placeholder, style, triggerStyle, dropdownStyle, className, triggerClassName, dropdownClassName }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
 
@@ -28,58 +29,21 @@ const CustomDropdown = ({ options, value, onChange, placeholder, style, triggerS
   const selectedOption = options.find(opt => opt.value === value);
 
   return (
-    <div ref={containerRef} style={{ position: "relative", width: "100%", ...style }}>
+    <div ref={containerRef} className={`bh-dropdown-container ${className || ""}`} style={style}>
       <div
         onClick={() => setIsOpen(!isOpen)}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "8px 12px",
-          border: "1px solid #cbd5e1",
-          borderRadius: "8px",
-          backgroundColor: "#ffffff",
-          cursor: "pointer",
-          minHeight: "38px",
-          fontSize: "14px",
-          color: selectedOption ? "#1e293b" : "#94a3b8",
-          userSelect: "none",
-          ...triggerStyle,
-        }}
+        className={`bh-dropdown-trigger ${selectedOption ? "has-value" : ""} ${triggerClassName || ""}`}
+        style={triggerStyle}
       >
         <span>{selectedOption ? selectedOption.label : placeholder || "Select..."}</span>
         <FontAwesomeIcon
           icon={faCaretDown}
-          style={{
-            fontSize: "12px",
-            color: "#94a3b8",
-            transform: isOpen ? "rotate(180deg)" : "none",
-            transition: "transform 0.2s",
-            marginLeft: "8px",
-          }}
+          className={`bh-dropdown-trigger-icon${isOpen ? " is-open" : ""}`}
         />
       </div>
 
       {isOpen && (
-        <div
-          style={{
-            position: "absolute",
-            top: "100%",
-            left: 0,
-            right: 0,
-            zIndex: 1050,
-            backgroundColor: "#ffffff",
-            border: "1px solid #cbd5e1",
-            borderRadius: "10px",
-            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
-            marginTop: "4px",
-            maxHeight: "220px",
-            overflowY: "auto",
-            overflowX: "hidden",
-            padding: "0",
-            ...dropdownStyle,
-          }}
-        >
+        <div className={`bh-dropdown-menu ${dropdownClassName || ""}`} style={dropdownStyle}>
           {options.map((opt) => {
             const isSelected = opt.value === value;
             return (
@@ -89,32 +53,9 @@ const CustomDropdown = ({ options, value, onChange, placeholder, style, triggerS
                   onChange(opt.value);
                   setIsOpen(false);
                 }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "10px 16px",
-                  fontSize: "13px",
-                  cursor: "pointer",
-                  backgroundColor: isSelected ? "#dc2626" : "#ffffff",
-                  color: isSelected ? "#ffffff" : "#334155",
-                  fontWeight: isSelected ? "600" : "400",
-                  transition: "background-color 0.15s, color 0.15s",
-                  userSelect: "none",
-                }}
-                onMouseEnter={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.backgroundColor = "#f1f5f9";
-                    e.currentTarget.style.color = "#1e293b";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.backgroundColor = "#ffffff";
-                    e.currentTarget.style.color = "#334155";
-                  }
-                }}
+                className={`bh-dropdown-item${isSelected ? " is-selected" : ""}`}
               >
-                <span style={{ width: "16px", marginRight: "8px", display: "inline-flex", justifyContent: "center", fontWeight: "bold" }}>
+                <span className="bh-dropdown-item-check">
                   {isSelected ? "✓" : ""}
                 </span>
                 <span>{opt.label}</span>
@@ -144,6 +85,69 @@ const formatCurrency = (val) => {
     style: "currency",
     currency: "USD",
   }).format(num);
+};
+
+const readPendingLockIds = (storageKey) => {
+  try {
+    const raw = localStorage.getItem(storageKey);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return new Set(Array.isArray(parsed) ? parsed.map(String) : []);
+  } catch {
+    return new Set();
+  }
+};
+
+const getBillingAmount = (item) => {
+  const rawAmount = item?.fundAdd ?? item?.totalFund ?? item?.availableFund ?? item?.fund ?? 0;
+  const numericAmount = Number(String(rawAmount).replace(/[^0-9.-]/g, ""));
+  return Number.isFinite(numericAmount) ? numericAmount.toFixed(2) : "0.00";
+};
+
+const getBillingSignature = (item) => {
+  const userKey = String(item?.userId ?? "").trim().toLowerCase();
+  const advertiserKey = String(item?.advertiserId ?? item?.userName ?? item?.name ?? "").trim().toLowerCase();
+  const amountKey = getBillingAmount(item);
+  return `${userKey}|${advertiserKey}|${amountKey}`;
+};
+
+const getBillingSortTime = (item, index) => {
+  const timeSource = item?.createdAt || item?.approvedAt || item?.updatedAt || item?.created_at || item?.updated_at;
+  const parsedTime = Date.parse(timeSource);
+  return Number.isFinite(parsedTime) ? parsedTime : index;
+};
+
+const buildPendingLockedIds = (rawData) => {
+  const finalStatuses = new Set(["approved", "rejected"]);
+  const lockedIds = new Set();
+  const pendingStacks = new Map();
+
+  const sortedRows = rawData
+    .map((item, index) => ({ item, index, sortTime: getBillingSortTime(item, index) }))
+    .sort((a, b) => a.sortTime - b.sortTime || a.index - b.index);
+
+  sortedRows.forEach(({ item }) => {
+    const rowId = item?.billingHistoryId ?? item?.id;
+    const normalizedStatus = String(item?.status || item?.xstatus || "Pending").trim().toLowerCase();
+    const signature = getBillingSignature(item);
+
+    if (normalizedStatus === "pending") {
+      const queue = pendingStacks.get(signature) || [];
+      queue.push(String(rowId));
+      pendingStacks.set(signature, queue);
+      return;
+    }
+
+    if (!finalStatuses.has(normalizedStatus)) return;
+
+    const queue = pendingStacks.get(signature);
+    if (queue && queue.length > 0) {
+      const lockedPendingId = queue.pop();
+      lockedIds.add(lockedPendingId);
+      pendingStacks.set(signature, queue);
+    }
+  });
+
+  return lockedIds;
 };
 
 const escapePdfText = (text) =>
@@ -275,6 +279,30 @@ const BillingHistory = () => {
   const [canCreateFund, setCanCreateFund] = useState(canCreate("Fund Management"));
   const [canApproveFund, setCanApproveFund] = useState(canApprove("Fund Management"));
   const [canViewUser, setCanViewUser] = useState(canView("Fund Management"));
+  const pendingLockStorageKey = useMemo(
+    () => `billing-pending-locks:${localStorage.getItem("userId") || "anonymous"}`,
+    [],
+  );
+  const [disabledPendingIds, setDisabledPendingIds] = useState(() => readPendingLockIds(pendingLockStorageKey));
+
+  const persistDisabledPendingIds = useCallback((nextIds) => {
+    const values = Array.from(nextIds).map(String);
+    try {
+      localStorage.setItem(pendingLockStorageKey, JSON.stringify(values));
+    } catch {
+      // Ignore storage failures; the in-memory lock still works for the session.
+    }
+  }, [pendingLockStorageKey]);
+
+  const lockPendingButton = useCallback((rowId) => {
+    if (rowId === undefined || rowId === null) return;
+    setDisabledPendingIds((prev) => {
+      const next = new Set(prev);
+      next.add(String(rowId));
+      persistDisabledPendingIds(next);
+      return next;
+    });
+  }, [persistDisabledPendingIds]);
 
   const fetchBillings = useCallback(async () => {
     setLoading(true);
@@ -287,6 +315,8 @@ const BillingHistory = () => {
           response.data.data?.informationBillings ||
           response.data.informationBillings ||
           (Array.isArray(response.data) ? response.data : []);
+        const pendingLockedIds = buildPendingLockedIds(rawData);
+        const lockedIds = readPendingLockIds(pendingLockStorageKey);
         const mappedData = rawData.map((item, index) => {
           let fundValue = 0;
           if (item.totalFund !== null && item.totalFund !== undefined && item.totalFund !== 0) {
@@ -302,6 +332,11 @@ const BillingHistory = () => {
           }
 
           let formattedFund = formatCurrency(fundValue);
+          const rowId = item.billingHistoryId ?? item.id;
+          const rowStatus = (() => {
+            const rawStatus = item.status || item.xstatus || "Pending";
+            return rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
+          })();
 
           const formatDateTime = (dateStr) => {
             if (!dateStr) return "-";
@@ -310,7 +345,7 @@ const BillingHistory = () => {
 
           return {
             sno: index + 1,
-            id: item.billingHistoryId ?? item.id,
+            id: rowId,
             userId: item.userId,
             advertiserId: item.advertiserId,
             agencyName: item.name || "-",
@@ -323,14 +358,12 @@ const BillingHistory = () => {
             fund: formattedFund,
             rawFund: fundValue,
             addedAt: formatDateTime(item.createdAt),
-            status: (() => {
-              const rawStatus = item.status || item.xstatus || "Pending";
-              return rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
-            })(),
+            status: rowStatus,
             statusUpdatedBy: item.statusUpdatedBy || item.approvedBy || "-",
             approvedBy: item.statusUpdatedBy || item.approvedBy || "-",
             approvedAt: formatDateTime(item.approvedAt),
             comments: item.comments || "",
+            pendingLocked: lockedIds.has(String(rowId)) || pendingLockedIds.has(String(rowId)),
           };
         });
         setRows(mappedData);
@@ -340,7 +373,7 @@ const BillingHistory = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [pendingLockStorageKey]);
 
   const [isAddFundOpen, setIsAddFundOpen] = useState(false);
   const [selectedAgency, setSelectedAgency] = useState("");
@@ -497,14 +530,15 @@ const BillingHistory = () => {
   };
 
   const handleOpenStatusModal = useCallback((row) => {
-    if (row.status.toLowerCase() !== "pending") return;
+    const normalizedStatus = String(row?.status || "").trim().toLowerCase();
+    if (normalizedStatus !== "pending" || row?.pendingLocked || disabledPendingIds.has(String(row?.id))) return;
     setSelectedRow(row);
     setStatusValue(row.status);
     setStatusComments(row.comments || "");
     const numericStr = row.rawFund !== undefined ? String(row.rawFund) : row.fund.replace(/[^0-9.]/g, "");
     setStatusFund(numericStr);
     setIsStatusOpen(true);
-  }, []);
+  }, [disabledPendingIds]);
 
   const handleOpenHistoryModal = useCallback(async (row) => {
     setHistoryRow(row);
@@ -584,6 +618,9 @@ const BillingHistory = () => {
 
       const response = await updateBillingStatus(payload);
       if (response && (response.status === 200 || response.status === 201 || response.data?.status === 200 || response.data?.status === 201)) {
+        if (["approved", "rejected"].includes(statusValue.toLowerCase())) {
+          lockPendingButton(selectedRow.id);
+        }
         fetchBillings();
         setIsStatusOpen(false);
         setSelectedRow(null);
@@ -698,43 +735,21 @@ const BillingHistory = () => {
         sortable: true,
         width: "135px",
         cell: (row) => (
-          (canApproveFund && row.status.toLowerCase() === "pending") ? (
+          (canApproveFund && row.status.toLowerCase() === "pending") ? (() => {
+            const isLocked = row.pendingLocked || disabledPendingIds.has(String(row.id));
+            return (
             <button
               type="button"
-              className="onoffbutton"
-              style={{
-                position: "relative",
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                cursor: "pointer",
-                border: "none",
-                backgroundColor: "#e53e3e",
-                color: "#ffffff",
-                padding: "3px 8px",
-                fontWeight: "600",
-                fontSize: "11px",
-                borderRadius: "2px",
-              }}
-              onClick={() => handleOpenStatusModal(row)}
+              className="onoffbutton bh-status-pill bh-status-pill-button"
+              disabled={isLocked}
+              onClick={() => !isLocked && handleOpenStatusModal(row)}
             >
               {row.status}
-              <i className="fa fa-caret-down ms-1" style={{ color: "#ffffff", fontSize: "10px" }}></i>
+              <i className="fa fa-caret-down bh-status-caret"></i>
             </button>
-          ) : (
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: row.status.toLowerCase() === "approved" ? "#2f855a" : row.status.toLowerCase() === "rejected" ? "#c53030" : "#d69e2e",
-                color: "#ffffff",
-                padding: "3px 8px",
-                fontWeight: "600",
-                fontSize: "11px",
-                borderRadius: "2px",
-              }}
-            >
+            );
+          })() : (
+            <span className={`bh-status-pill status-${row.status.toLowerCase()}`}>
               {row.status}
             </span>
           )
@@ -757,7 +772,8 @@ const BillingHistory = () => {
       handleOpenStatusModal,
       handleOpenHistoryModal,
       rows,
-      canApproveFund
+      canApproveFund,
+      disabledPendingIds,
     ]
   );
 
@@ -838,7 +854,7 @@ const BillingHistory = () => {
 
   if (!canViewUser) {
     return (
-      <div className="alert alert-warning mt-3" style={{ margin: "20px" }}>
+      <div className="alert alert-warning mt-3 bh-alert-warning">
         <i className="fa fa-exclamation-triangle me-2"></i>
         <strong>Access Denied:</strong> You do not have permission to view the Billing History.
       </div>
@@ -847,128 +863,83 @@ const BillingHistory = () => {
 
   return (
     <div className="campaign-daily-container">
-        <div className="campaign-daily-header" style={{ borderBottom: 'none', paddingBottom: 0 }}>
+        <div className="campaign-daily-header bh-header-borderless">
           <div>
             <div className="campaign-daily-title">
-              <h2>Billing History</h2>
+              <h2>Fund Management</h2>
             </div>
           </div>
         </div>
 
-        <Card className="mb-3" style={{ borderRadius: "18px", boxShadow: "0 6px 18px rgba(15, 23, 42, 0.06)" }}>
-          <CardBody className="py-3" style={{ overflow: "visible" }}>
-            <div className="campaign-daily-controls" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <Card className="mb-3 bh-card-container">
+          <CardBody className="py-3 bh-card-body">
+            <div className="campaign-daily-controls bh-controls-row">
+              <div className="bh-controls-left">
                 <button
-                  className="cdi-icon-btn"
+                  className="cdi-icon-btn bh-refresh-btn"
                   onClick={handleRefresh}
-                  style={{
-                    height: "30px",
-                    width: "auto",
-                    padding: "0 12px",
-                    fontSize: "12px",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    borderRadius: "6px",
-                    border: "1px solid #e2e8f0",
-                    backgroundColor: "white",
-                    color: "#64748b",
-                  }}
                 >
                   <FontAwesomeIcon
                     icon={faSync}
-                    className={loading ? "fa-spin" : ""}
-                    style={{ marginRight: '6px' }}
+                    className={loading ? "fa-spin bh-refresh-icon" : "bh-refresh-icon"}
                   />
                   Refresh
                 </button>
 
-                <div className="position-relative" style={{ minWidth: '220px' }}>
+                <div className="position-relative bh-search-wrapper">
                   <Input
-                    className="form-control py-1 px-3 custom-select-input"
+                    className="form-control py-1 px-3 custom-select-input bh-search-input"
                     type="text"
                     id="searching"
                     placeholder="Search billing history..."
-                    style={{ fontSize: "0.75rem", height: '30px', fontFamily: '"Open Sans", Arial, sans-serif', borderRadius: '6px', border: '1px solid #e2e8f0' }}
                     value={searchTerm}
                     onChange={handleSearchChange}
                   />
                 </div>
               </div>
 
-              <div className="cdi-pagination-controls" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div className="cdi-pagination-controls bh-pagination-controls-wrapper">
                 <div className="d-flex align-items-center flex-wrap gap-2">
-                  <div className="cd-pagination-summary" style={{ fontSize: '13px', color: '#64748b', fontWeight: 500, whiteSpace: 'nowrap' }}>
+                  <div className="cd-pagination-summary bh-pagination-summary">
                     {filteredRows.length
                       ? `${Math.min(currentPage * perPage, filteredRows.length)} of ${filteredRows.length} entries`
                       : "0 entries"}
                   </div>
-                  <div className="cd-pagination-toolbar" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
+                  <div className="cd-pagination-toolbar bh-pagination-toolbar">
                     {totalPages > 1 && (
-                      <div className="cd-pagination-controls" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
+                      <div className="cd-pagination-controls bh-pagination-nav-container">
                         <button
                           onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
                           disabled={currentPage === 1}
-                          className="cd-pagination-nav-btn"
+                          className="cd-pagination-nav-btn bh-page-nav-btn"
                           type="button"
-                          style={{ width: '30px', height: '30px', borderRadius: '50%', border: '1px solid #e2e8f0', backgroundColor: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', color: '#64748b' }}
                         >
-                          <FontAwesomeIcon icon={faChevronRight} style={{ transform: 'rotate(180deg)', fontSize: '12px' }} />
+                          <FontAwesomeIcon icon={faChevronRight} className="bh-page-nav-icon-prev" />
                         </button>
                         <button
-                          className="cd-pagination-page-btn is-active"
+                          className="cd-pagination-page-btn is-active bh-page-btn-active"
                           type="button"
-                          style={{
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '50%',
-                            border: 'none',
-                            backgroundColor: '#dc2626',
-                            color: 'white',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '14px',
-                            fontWeight: '500',
-                            cursor: 'default',
-                          }}
                         >
                           {currentPage}
                         </button>
-                        <span style={{ color: '#64748b', fontSize: '13px', margin: '0 4px', fontWeight: '500' }}>of</span>
+                        <span className="bh-page-separator">of</span>
                         <button
-                          className="cd-pagination-page-btn"
+                          className="cd-pagination-page-btn bh-page-btn-total"
                           type="button"
-                          style={{
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '50%',
-                            border: '1px solid #e2e8f0',
-                            backgroundColor: '#fff',
-                            color: '#64748b',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '14px',
-                            fontWeight: '500',
-                            cursor: 'default',
-                          }}
                         >
                           {totalPages}
                         </button>
                         <button
                           onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
                           disabled={currentPage >= totalPages}
-                          className="cd-pagination-nav-btn"
+                          className="cd-pagination-nav-btn bh-page-nav-btn"
                           type="button"
-                          style={{ width: '30px', height: '30px', borderRadius: '50%', border: '1px solid #e2e8f0', backgroundColor: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer', color: '#64748b' }}
                         >
-                          <FontAwesomeIcon icon={faChevronRight} style={{ fontSize: '12px' }} />
+                          <FontAwesomeIcon icon={faChevronRight} className="bh-page-nav-icon-next" />
                         </button>
                       </div>
                     )}
-                    <div style={{ position: 'relative', marginLeft: '8px' }}>
+                    <div className="bh-per-page-dropdown-container">
                       <CustomDropdown
                         options={perPageOptions}
                         value={perPage}
@@ -976,64 +947,26 @@ const BillingHistory = () => {
                           setPerPage(val);
                           setCurrentPage(1);
                         }}
-                        style={{ width: "135px" }}
-                        triggerStyle={{
-                          minHeight: "30px",
-                          height: "30px",
-                          padding: "0 12px",
-                          borderRadius: "6px",
-                          border: "1px solid #e2e8f0",
-                          fontSize: "14px",
-                          fontWeight: "600",
-                          color: "#1e293b",
-                        }}
-                        dropdownStyle={{
-                          width: "135px",
-                          maxHeight: "220px",
-                          borderRadius: "8px",
-                        }}
+                        className="bh-per-page-container"
+                        triggerClassName="bh-per-page-trigger"
+                        dropdownClassName="bh-per-page-dropdown"
                       />
                     </div>
                   </div>
 
                   <button
-                    className="cdi-export-btn"
+                    className="cdi-export-btn bh-export-btn"
                     onClick={handleExportCSV}
-                    style={{
-                      backgroundColor: "#dc2626",
-                      color: "white",
-                      borderColor: "#dc2626",
-                      height: "30px",
-                      fontSize: "12px",
-                      padding: "0 12px",
-                      borderRadius: "6px",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "6px",
-                    }}
                   >
-                    <FontAwesomeIcon icon={faDownload} style={{ fontSize: "11px" }} />
+                    <FontAwesomeIcon icon={faDownload} className="bh-refresh-icon" />
                     EXPORT CSV
                   </button>
                   {canCreateFund && (
                     <button
-                      className="cdi-export-btn"
+                      className="cdi-export-btn bh-add-fund-btn"
                       onClick={() => setIsAddFundOpen(true)}
-                      style={{
-                        backgroundColor: "#0ea5e9",
-                        color: "white",
-                        borderColor: "#0ea5e9",
-                        marginLeft: "8px",
-                        height: "30px",
-                        fontSize: "12px",
-                        padding: "0 12px",
-                        borderRadius: "6px",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "6px",
-                      }}
                     >
-                      <FontAwesomeIcon icon={faPlus} style={{ fontSize: "11px" }} />
+                      <FontAwesomeIcon icon={faPlus} className="bh-refresh-icon" />
                       ADD FUND
                     </button>
                   )}
@@ -1044,8 +977,8 @@ const BillingHistory = () => {
         </Card>
 
         <div className="campaign-daily-table-wrapper">
-          <div style={{ border: "1px solid #e6ebf2", borderRadius: "14px", overflowX: "auto", overflowY: "auto", maxHeight: "70vh" }}>
-            <div style={{ minWidth: "1400px" }}>
+          <div className="bh-table-wrapper">
+            <div className="bh-table-inner">
               <DataTable
                 className="data-table"
                 columns={columns}
@@ -1109,7 +1042,7 @@ const BillingHistory = () => {
                 />
               </FormGroup>
             </ModalBody>
-            <ModalFooter style={{ borderTop: "none", padding: "15px 20px" }}>
+            <ModalFooter className="bh-modal-footer">
               <Button
                 type="button"
                 className="cancels"
@@ -1166,7 +1099,6 @@ const BillingHistory = () => {
                 <CustomDropdown
                   options={[
                     { label: "Approved", value: "Approved" },
-                    { label: "Hold", value: "Hold" },
                     { label: "Rejected", value: "Rejected" },
                   ]}
                   value={statusValue}
@@ -1174,7 +1106,7 @@ const BillingHistory = () => {
                 />
               </FormGroup>
             </ModalBody>
-            <ModalFooter style={{ borderTop: "none", padding: "15px 20px" }}>
+            <ModalFooter className="bh-modal-footer">
               <Button
                 type="button"
                 className="cancels"
@@ -1198,51 +1130,51 @@ const BillingHistory = () => {
             <i className="fa fa-info-circle me-2 text-primary"></i>
             Billing Record Details
           </ModalHeader>
-          <ModalBody style={{ padding: "20px 24px" }}>
+          <ModalBody className="bh-history-modal-body">
             {historyLoading ? (
               <div className="text-center py-5">
                 <i className="fa fa-spinner fa-spin fa-3x text-primary mb-3"></i>
-                <div className="text-muted font-weight-bold" style={{ fontSize: "14px" }}>
+                <div className="text-muted font-weight-bold bh-history-fetching-text">
                   Fetching billing history details...
                 </div>
               </div>
             ) : historyRow && (
-              <div className="table-responsive" style={{ borderRadius: "14px", border: "1px solid #e6ebf2", overflow: "hidden" }}>
-                <Table hover striped style={{ margin: 0, fontSize: "13px", minWidth: "1000px" }}>
+              <div className="table-responsive bh-history-table-wrapper">
+                <Table hover striped className="bh-history-table">
                   <thead>
-                    <tr style={{ backgroundColor: "#eef4fa", height: "56px", borderBottom: "1px solid #dfe7f1" }}>
-                      <th style={{ color: "#64748b", fontSize: "12px", fontWeight: 800, textTransform: "uppercase", padding: "14px 12px", borderRight: "1px solid #e6ebf2", textAlign: "left", verticalAlign: "middle" }}>S.No</th>
-                      <th style={{ color: "#64748b", fontSize: "12px", fontWeight: 800, textTransform: "uppercase", padding: "14px 12px", borderRight: "1px solid #e6ebf2", textAlign: "left", verticalAlign: "middle" }}>Campaign Name</th>
-                      <th style={{ color: "#64748b", fontSize: "12px", fontWeight: 800, textTransform: "uppercase", padding: "14px 12px", borderRight: "1px solid #e6ebf2", textAlign: "left", verticalAlign: "middle" }}>Budget Credit</th>
-                      <th style={{ color: "#64748b", fontSize: "12px", fontWeight: 800, textTransform: "uppercase", padding: "14px 12px", borderRight: "1px solid #e6ebf2", textAlign: "left", verticalAlign: "middle" }}>Budget Debit</th>
-                      <th style={{ color: "#64748b", fontSize: "12px", fontWeight: 800, textTransform: "uppercase", padding: "14px 12px", borderRight: "1px solid #e6ebf2", textAlign: "left", verticalAlign: "middle" }}>Credited Date</th>
-                      <th style={{ color: "#64748b", fontSize: "12px", fontWeight: 800, textTransform: "uppercase", padding: "14px 12px", borderRight: "1px solid #e6ebf2", textAlign: "left", verticalAlign: "middle" }}>Debited Date</th>
-                      <th style={{ color: "#64748b", fontSize: "12px", fontWeight: 800, textTransform: "uppercase", padding: "14px 12px", borderRight: "1px solid #e6ebf2", textAlign: "left", verticalAlign: "middle" }}>Added By</th>
-                      <th style={{ color: "#64748b", fontSize: "12px", fontWeight: 800, textTransform: "uppercase", padding: "14px 12px", borderRight: "1px solid #e6ebf2", textAlign: "left", verticalAlign: "middle" }}>Approved By</th>
+                    <tr className="bh-history-thead-tr">
+                      <th className="bh-history-th">S.No</th>
+                      <th className="bh-history-th">Campaign Name</th>
+                      <th className="bh-history-th">Budget Credit</th>
+                      <th className="bh-history-th">Budget Debit</th>
+                      <th className="bh-history-th">Credited Date</th>
+                      <th className="bh-history-th">Debited Date</th>
+                      <th className="bh-history-th">Added By</th>
+                      <th className="bh-history-th">Approved By</th>
                     </tr>
                   </thead>
                   <tbody>
                     {historyList && historyList.length > 0 ? (
                       historyList.map((item, idx) => (
-                        <tr key={idx} style={{ height: "56px", borderBottom: "1px solid #eef2f7" }}>
-                          <td style={{ padding: "10px 14px", color: "#334155", borderRight: "1px solid #f1f5f9", verticalAlign: "middle" }}>{idx + 1}</td>
-                          <td style={{ padding: "10px 14px", color: "#334155", borderRight: "1px solid #f1f5f9", verticalAlign: "middle" }}>{item.campaignName}</td>
-                          <td style={{ padding: "10px 14px", color: item.credit !== "-" ? "#059669" : "#64748b", fontWeight: item.credit !== "-" ? "600" : "normal", borderRight: "1px solid #f1f5f9", verticalAlign: "middle" }}>
+                        <tr key={idx} className="bh-history-tbody-tr">
+                          <td className="bh-history-td">{idx + 1}</td>
+                          <td className="bh-history-td">{item.campaignName}</td>
+                          <td className={`bh-history-td ${item.credit !== "-" ? "bh-history-td-credit" : "bh-history-td-credit-dash"}`}>
                             {item.credit}
                           </td>
-                          <td style={{ padding: "10px 14px", color: item.debit !== "-" ? "#dc2626" : "#64748b", fontWeight: item.debit !== "-" ? "600" : "normal", borderRight: "1px solid #f1f5f9", verticalAlign: "middle" }}>
+                          <td className={`bh-history-td ${item.debit !== "-" ? "bh-history-td-debit" : "bh-history-td-debit-dash"}`}>
                             {item.debit}
                           </td>
-                          <td style={{ padding: "10px 14px", color: "#334155", borderRight: "1px solid #f1f5f9", verticalAlign: "middle" }}>{item.creditedDate}</td>
-                          <td style={{ padding: "10px 14px", color: "#334155", borderRight: "1px solid #f1f5f9", verticalAlign: "middle" }}>{item.debitedDate}</td>
-                          <td style={{ padding: "10px 14px", color: "#334155", borderRight: "1px solid #f1f5f9", verticalAlign: "middle" }}>
-                            <span style={{ backgroundColor: "#e2e8f0", padding: "2px 6px", borderRadius: "4px", fontSize: "11px", fontWeight: "500" }}>
+                          <td className="bh-history-td">{item.creditedDate}</td>
+                          <td className="bh-history-td">{item.debitedDate}</td>
+                          <td className="bh-history-td">
+                            <span className="bh-badge-addedby">
                               {item.addedBy}
                             </span>
                           </td>
-                          <td style={{ padding: "10px 14px", color: "#334155", borderRight: "1px solid #f1f5f9", verticalAlign: "middle" }}>
+                          <td className="bh-history-td">
                             {item.approvedBy !== "-" && item.approvedBy !== "Pending Approval" ? (
-                              <span style={{ backgroundColor: "#dbeafe", color: "#1e40af", padding: "2px 6px", borderRadius: "4px", fontSize: "11px", fontWeight: "500" }}>
+                              <span className="bh-badge-approvedby">
                                 {item.approvedBy}
                               </span>
                             ) : (
@@ -1253,7 +1185,7 @@ const BillingHistory = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="8" style={{ textAlign: "center", padding: "80px 0", color: "#64748b", fontWeight: "500" }}>
+                        <td colSpan="8" className="bh-no-history-td">
                           No data available
                         </td>
                       </tr>
@@ -1263,7 +1195,7 @@ const BillingHistory = () => {
               </div>
             )}
           </ModalBody>
-          <ModalFooter style={{ borderTop: "none", padding: "15px 20px" }}>
+          <ModalFooter className="bh-modal-footer">
             <Button
               type="button"
               className="cancels"

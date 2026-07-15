@@ -10,6 +10,7 @@ import { signin, syncTokenToAxios, GetAccess } from "../src/views/api/Api.jsx";
 import { useGlobalTabs } from "./context/TabContext";
 import axios from "axios";
 import menuRoutes from "./utils/routeConstent.js";
+import warningIcon from "../src/assets/img/warning_triangle_small.png";
 
 const buildRouteLookup = (routeItems = []) => {
   const lookup = {};
@@ -47,8 +48,10 @@ const LoginModal = (props) => {
     await Swal.fire({
       html: `
         <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
-          <img src="warning_triangle_small.png"
-          style="width:18px;height:18px;" />
+          <img src="${warningIcon}"
+            style="width:18px;height:18px;"
+            alt="Warning"
+          />
           <span style="font-size:16px;font-weight:bold;">Error</span>
         </div>
         <div style="margin-top:10px;font-size:13px;text-align:center;">

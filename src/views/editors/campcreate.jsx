@@ -1035,8 +1035,12 @@ const CreateCampaign = (props) => {
   const [count, setCount] = useState(0);
   const [primaryPopupShown, setPrimaryPopupShown] = useState(false);
   const [campaign, setCampaign] = useState(props.campaign);
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  const [startDate, setStartDate] = useState(() => new Date());
+  const [endDate, setEndDate] = useState(() => {
+    const date = new Date();
+    date.setDate(date.getDate() + 90);
+    return date;
+  });
   const navigate = useNavigate();
   const [daypartSchedule, setDaypartSchedule] = useState(
     props.campaign?.daypartSchedule,
@@ -4974,7 +4978,9 @@ const CreateCampaign = (props) => {
   useEffect(() => {
     const now = new Date();
     setStartDate(now);
-    setEndDate(new Date(now.getTime() + 60 * 60 * 1000));
+    const end = new Date();
+    end.setDate(end.getDate() + 90);
+    setEndDate(end);
   }, []);
   const [openModels, setOpenModels] = useState(false);
 

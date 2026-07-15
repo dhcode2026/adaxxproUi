@@ -187,97 +187,6 @@ export const deleteAddon = (addonsId) => {
 export const editAddon = (addonsId) => {
   return axios.get(`${API_BASE}/addons/getAddonsById/${addonsId}`);
 };
-
-export const saveBrand = (payload) => {
-  return axios.post(`${API_BASE}/brand/createBrand`, payload);
-};
-
-export const getAllBrand = () => {
-  return axios.get(`${API_BASE}/brand/getAllBrand`);
-};
-
-export const editbrand = (brandId) => {
-  return axios.get(`${API_BASE}/brand/getBrandById/${brandId}`);
-};
-
-export const deletebrand = (brandId) => {
-  return axios.delete(`${API_BASE}/brand/deleteBrandById/${brandId}`);
-};
-
-export const updateBrand = (brandId, payload) => {
-  return axios.put(`${API_BASE}/brand/updateBrandById/${brandId}`, payload);
-};
-
-export const getBrandsByDateRange = (startDate, endDate, range = null) => {
-  let url = `${API_BASE}/brand/getBYDateRange?startDate=${startDate}&endDate=${endDate}`;
-  if (range) {
-    url += `&range=${range}`;
-  }
-  return axios.get(url);
-};
-
-export const Brandsearch = (brandId, brandName) => {
-  return axios.get(`${API_BASE}/brand/searchBrand`, {
-    params: {
-      brandId,
-      brandName,
-    },
-  });
-};
-
-export const saveGroup = async (brandId, groupData) => {
-  try {
-    const response = await axios.post(
-      `${API_BASE}/group/createGroup?brandId=${brandId}`,
-      groupData
-    );
-    return response;
-  } catch (error) {
-   
-    throw error;
-  }
-};
-
-export const upadtestatusBrand = (brandId, status) => {
-  return axios.put(`${API_BASE}/brand/updateStatus/${brandId}`, null, {
-    params: { status }
-  });
-};
-
-export const getAllGroup = () => {
-  return axios.get(`${API_BASE}/group/getAllGroups`);
-};
-
-export const getgroupByDateRange = (brandId, startDate, endDate, range = null) => {
-  let url = `${API_BASE}/group/getBYDateRange?brandId=${brandId}&startDate=${startDate}&endDate=${endDate}`;
-  if (range) {
-    url += `&range=${range}`;
-  }
-  return axios.get(url);
-};
-
-export const editGroup = (groupId) => {
-  return axios.get(`${API_BASE}/group/getGroupById/${groupId}`);
-};
-
-export const copyGroup = (groupId) => {
-  return axios.get(`${API_BASE}/group/getGroupById/${groupId}`);
-};
-
-export const updateGroup = (groupId, payload) => {
-  return axios.put(`${API_BASE}/group/updateGroupById/${groupId}`, payload);
-};
-
-export const deletegroup = (groupId) => {
-  return axios.delete(`${API_BASE}/group/deleteGroupById/${groupId}`);
-};
-
-export const upadtestatusGroup = (groupId, status) => {
-  return axios.put(`${API_BASE}/group/updateStatus/${groupId}`, null, {
-    params: { status }
-  });
-};
-
 export const getAllCategory = () => {
   return axios.get(`${API_BASE}/category/getAllCategory`);
 };
@@ -486,6 +395,14 @@ export const editGroupbrand = (brandId) => {
   return axios.get(`${API_BASE}/group/getGroupByBrandId`, {
     params: { brandId }
   });
+};
+
+export const getgroupByDateRange = (brandId, startDate, endDate, range = null) => {
+  let url = `${API_BASE}/group/getBYDateRange?brandId=${brandId}&startDate=${startDate}&endDate=${endDate}`;
+  if (range) {
+    url += `&range=${range}`;
+  }
+  return axios.get(url);
 };
 
 export const listCRMAudiencebrand = (brandId) => {
@@ -792,15 +709,6 @@ export const fillterCreative = (creativesId, campaignId) => {
     params: { creativesId, campaignId }
   });
 };
-
-// export const createCampaign = async (campaignId, payload) => {
-//   return axios.post(
-//     `${API_BASE}/campaign/createCampaign/${campaignId}`,
-//     payload
-//   );
-// };
-
-
 
 export const createCampaign = async (payload) => {
   return axios.post(

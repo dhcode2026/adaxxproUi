@@ -15937,7 +15937,7 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-cancel) {
 }
 
 .campaign-loader-overlay {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
@@ -17412,4 +17412,33 @@ margin-bottom: 0px !important;
 }
 .sidebar-navlink1{
   background-color: transparent;
+}
+
+#perPageSelect {
+  height: 30px;
+  min-height: 30px;
+  border-radius: 6px;
+  padding: 8px 28px 8px 16px;
+  border: 1px solid #e2e8f0;
+  font-size: 12px;
+  color: #1e293b;
+  font-weight: 600;
+  background-color: #fff;
+  cursor: pointer;
+  outline: none;
+  max-width: 130px;
+}
+.campaign-select-wrapper1 {
+  position: relative;
+  margin-left: 8px;
+}
+
+.classicon{
+  font-size: 14px !important;
+}
+.cd-pagination-separators {
+  color: #64748b;
+  font-size: 13px;
+  margin: 0 4px;
+  font-weight: 500;
 }

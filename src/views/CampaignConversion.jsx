@@ -19,12 +19,11 @@ import { FaCalendarAlt, FaCaretDown, FaCog, FaChevronDown } from "react-icons/fa
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSync, faDownload, faChevronRight, faChevronDown as faChevronDownSolid, faCalendarAlt as faCalendarAltSolid } from "@fortawesome/free-solid-svg-icons";
 import DataTable from "react-data-table-component";
-import { getAllGroup, upadtestatusGroup, editGroup, getgroupByDateRange, getGroupStatus } from "./api/Api";
-import { editGroupbrand } from "./api/Api";
 import ConversionCustomizationModal from "../views/customizationcolumns/ConversionCustomizationModal";
 import { useNavigate, useLocation } from "react-router-dom";
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { getgroupByDateRange } from "../views/api/Api";
 import { canView } from "../utils/permissionHelper";
 import "../assets/css/reports.css";
 
@@ -197,38 +196,7 @@ const CampaignConversion = (props) => {
       }
     };
 
-    const handleStatusChange = async (newStatusText) => {
-      if (currentStatus === newStatusText || updating) return;
-      setUpdating(true);
-      try {
-        console.log(`Updating group ${row.groupId} status to ${newStatusText}`);
-        const statusCode = getStatusCode(newStatusText);
-        const response = await upadtestatusGroup(row.groupId, statusCode);
 
-        if (response.data?.success || response.status === 200) {
-          setCurrentStatus(newStatusText);
-          setRowData(prevData =>
-            prevData.map(item =>
-              item.groupId === row.groupId ? {
-                ...item,
-                status: newStatusText
-              } : item
-            )
-          );
-          await refresh();
-          console.log("Status updated successfully");
-        } else {
-          console.error("Failed to update status:", response.data?.message);
-          alert(`Failed to update status: ${response.data?.message || "Unknown error"}`);
-        }
-      } catch (err) {
-        console.error("Error updating status:", err);
-        alert(`Error updating status: ${err.message || err}`);
-      } finally {
-        setUpdating(false);
-        setStatusOpen(false);
-      }
-    };
 
     return (
       <Dropdown isOpen={statusOpen} toggle={toggleStatus} disabled={updating}>
@@ -249,14 +217,14 @@ const CampaignConversion = (props) => {
         </DropdownToggle>
         <DropdownMenu className="audiencemenu reports-status-menu">
           <DropdownItem
-            onClick={() => handleStatusChange("On")}
+           
             active={currentStatus === "On"}
             disabled={updating}
           >
             <span className="conversionstatus">On</span>
           </DropdownItem>
           <DropdownItem
-            onClick={() => handleStatusChange("Archived")}
+           
             active={currentStatus === "Archived"}
             disabled={updating}
           >
@@ -788,7 +756,6 @@ const CampaignConversion = (props) => {
     try {
       await delay(1000);
       if (showArchived) {
-        await fetchArchivedGroup();
       } else if (appliedDateRange) {
         await fetchgroupListByDateRange(
           appliedDateRange.startDate,
@@ -1160,7 +1127,6 @@ const CampaignConversion = (props) => {
     setLoading(true);
     setTimeout(() => {
       if (showArchived) {
-        fetchArchivedGroup();
       } else if (appliedDateRange) {
         fetchgroupListByDateRange(
           appliedDateRange.startDate,
@@ -1244,23 +1210,22 @@ const CampaignConversion = (props) => {
         endDate: formattedEndDate,
         range
       });
-
       const res = await getgroupByDateRange(
         currentBrandId || 0,
         formattedStartDate,
         formattedEndDate,
         range
       );
-      console.log("CRM Date range API Response:", res.data);
+      console.log("CRM Date range API Response:", res?.data);
       let list = [];
-      if (res.data?.data?.informationGroups) {
+      if (res?.data?.data?.informationGroups) {
         list = res.data.data.informationGroups;
-      } else if (res.data?.informationGroups) {
+      } else if (res?.data?.informationGroups) {
         list = res.data.informationGroups;
-      } else if (res.data?.data) {
+      } else if (res?.data?.data) {
         list = res.data.data;
       } else {
-        list = res.data || [];
+        list = res?.data || [];
       }
       const formatted = list.map((item) => ({
         id: item.groupId || item.id || item.groupId,
@@ -1289,108 +1254,10 @@ const CampaignConversion = (props) => {
     return date.toISOString().split('T')[0];
   };
 
-  const fetchArchivedGroup = async () => {
-    setLoading(true);
-    try {
-      const res = await getGroupStatus(3);
 
-      console.log("Archived API Response:", res.data);
-
-      let list = [];
-
-      if (res.data?.data?.informationGroups) {
-        list = res.data.data.informationGroups;
-      } else if (res.data?.informationGroups) {
-        list = res.data.informationGroups;
-      } else if (Array.isArray(res.data)) {
-        list = res.data;
-      } else if (res.data?.data && Array.isArray(res.data.data)) {
-        list = res.data.data;
-      } else {
-        list = [];
-      }
-
-      console.log("Extracted archived list:", list);
-
-      if (currentBrandId) {
-        list = list.filter(item => {
-          return !item.brandId || item.brandId == currentBrandId;
-        });
-      }
-
-      const formatted = list.map((item) => {
-        const formattedItem = {
-          id: item.groupId || item.id || item.groupId,
-          groupId: item.groupId || item.groupId || item.groupId,
-          name: item.name || item.name || "Unnamed Group",
-          status: getStatusText(item.status || 1),
-          budget: item.budget || item.budget || "0",
-          gbo_status: item.gbo_status || item.gbo_status || "Off",
-          startDate: item.startDate || item.startDate || "",
-          endDate: item.endDate || item.endDate || "",
-          kpimetric: item.kpimetric || item.kpimetric || "-",
-          kpivalue: item.kpivalue || item.kpivalue || "-",
-          brandId: item.brandId || currentBrandId,
-          originalData: item
-        };
-
-        console.log(`Mapping item ${formattedItem.audienceId}:`, formattedItem);
-        return formattedItem;
-      });
-
-      console.log("Final formatted archived data:", formatted);
-      setRowData(formatted);
-
-    } catch (err) {
-      console.error("Error fetching archived audiences:", err);
-      console.error("Error details:", err.response?.data || err.message);
-
-      try {
-        console.log("Trying fallback to regular audience list...");
-        let fallbackList = [];
-
-        if (currentBrandId) {
-          const res = await editGroup(currentBrandId);
-          if (res.data?.data?.informationGroups) {
-            fallbackList = res.data.data.informationGroups;
-          } else if (res.data?.informationGroups) {
-            fallbackList = res.data.informationGroups;
-          }
-        } else {
-          // const res = await fetchGroupList();
-          // fallbackList = res?.data?.data?.informationGroups || [];
-        }
-
-        fallbackList = fallbackList.filter(item => item.status == 3);
-
-        const formattedFallback = fallbackList.map((item) => ({
-          id: item.groupId || item.id || item.groupId,
-          groupId: item.groupId || item.groupId || item.groupId,
-          name: item.name || item.name || "Unnamed Group",
-          status: getStatusText(item.status || 1),
-          budget: item.budget || item.budget || "0",
-          gbo_status: item.gbo_status || item.gbo_status || "Off",
-          startDate: item.startDate || item.startDate || "",
-          endDate: item.endDate || item.endDate || "",
-          kpimetric: item.kpimetric || item.kpimetric || "-",
-          kpivalue: item.kpivalue || item.kpivalue || "-",
-          brandId: item.brandId || currentBrandId,
-          originalData: item
-        }));
-
-        setRowData(formattedFallback);
-
-      } catch (fallbackErr) {
-        console.error("Fallback also failed:", fallbackErr);
-        alert(`Error loading archived audiences: ${err.message || "Unknown error"}`);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
   useEffect(() => {
     if (showArchived) {
-      fetchArchivedGroup();
+    
     } else {
       if (appliedDateRange) {
         fetchgroupListByDateRange(

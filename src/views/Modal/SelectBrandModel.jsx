@@ -16,9 +16,6 @@ import {
 } from "reactstrap";
 import { FaCaretDown, FaCaretRight, FaCaretUp, FaCog } from "react-icons/fa";
 import DataTable from "react-data-table-component";
-import { getAllBrand } from "../../views/api/Api";
-
-
 const BrandModal = ({ isOpen, toggle, onSelectBrands }) => {
     const [selectedIds, setSelectedIds] = useState([]);
     const [count, setCount] = useState(0);
@@ -170,32 +167,9 @@ const BrandModal = ({ isOpen, toggle, onSelectBrands }) => {
             },
         },
     ];
-
-    const fetchBrandList = async () => {
-        setLoading(true);
-        try {
-            const res = await getAllBrand();
-            const list = res?.data?.data?.informationBrands || [];
-            console.log("API Response:", list);
-            const formatted = list.map((item) => ({
-                id: item.brandId || item.id || item.brandId,
-                name: item.brandName || item.brandName || "Unnamed Domain",
-                domainlist: item.domainlist || item.domainlist || "1",
-                originalData: item
-            }));
-
-            console.log("Formatted data:", formatted);
-            setRowData(formatted);
-        } catch (err) {
-            console.error("Error fetching exchanges:", err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
         if (isOpen) {
-            fetchBrandList();
+           
         }
     }, [isOpen]);
 

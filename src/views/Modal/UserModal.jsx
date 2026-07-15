@@ -143,8 +143,8 @@ const UserModal = (props) => {
         roleId: userToEdit.roleId || "",
         password: "",
         accountManagerId: userToEdit.accountManagerId || "",
-        companyName: userToEdit.companyName || "",
-        phoneNumber: userToEdit.phoneNumber || "",
+        companyName: userToEdit.companyName || userToEdit.originalData?.companyName || "",
+        phoneNumber: userToEdit.phoneNumber || userToEdit.originalData?.phoneNumber || "",
       });
       setSelectedManagerId(userToEdit.accountManagerId || "");
       setSelectedManagerEmail(managerEmail);
