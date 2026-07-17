@@ -58,21 +58,10 @@ const Exchanges = () => {
   const [canEditUser, setCanEditUser] = useState(false);
   const [canDeleteUser, setCanDeleteUser] = useState(false);
   const [canUpdateUser, setCanUpdateUser] = useState(false);
-
-  // useEffect(() => {
-  //   initializePageTab("Exchanges", "fa fa-exchange", "/admin/exchange");
-  // }, [initializePageTab]);
-
   const [step, setStep] = useState(0);
   const steps = [
-    // { label: "Daily Reporting", icon: "tim-icons icon-user-run" },
-    // { label: "Hourly Reporting", icon: "icon-world" },
   ];
-
-
-
   const redraw = () => setCount((c) => c + 1);
-
   const toBoolean = (value) => {
     if (typeof value === "boolean") return value;
     if (typeof value === "number") return value === 1;
@@ -82,12 +71,10 @@ const Exchanges = () => {
     }
     return false;
   };
-
   const formatDateForApi = (date) => {
     if (!date) return "";
     return date.toISOString().split("T")[0];
   };
-
   const fetchExchanges = async () => {
     setLoading(true);
     try {
@@ -130,8 +117,7 @@ const Exchanges = () => {
             postbackConversionUrl: item.postbackConversionUrl || "",
             originalData: item,
           };
-        })
-        .filter((item) => ["PubMatic", "Equativ", "Magnite", "vlion"].includes(item.name));
+        });
 
       const uniqueRows = Array.from(new Map(formatted.map((item) => [item.exchangeId, item])).values());
       setRowData(uniqueRows);
